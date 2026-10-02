@@ -36,3 +36,120 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #75a71e;
 }
+
+/* 3D Animations & Visual Effects */
+@keyframes float3d {
+  0%, 100% {
+    transform: perspective(1000px) translateY(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  25% {
+    transform: perspective(1000px) translateY(-10px) rotateX(5deg) rotateY(-6deg) rotateZ(1deg);
+  }
+  50% {
+    transform: perspective(1000px) translateY(-18px) rotateX(-4deg) rotateY(6deg) rotateZ(-1deg);
+  }
+  75% {
+    transform: perspective(1000px) translateY(-8px) rotateX(6deg) rotateY(3deg) rotateZ(0.5deg);
+  }
+}
+
+@keyframes floatShadow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(0.75);
+    opacity: 0.15;
+  }
+}
+
+@keyframes orbitSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-150%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(150%) rotate(25deg);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes floatBadge1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+  }
+}
+
+@keyframes floatBadge2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(-3deg);
+  }
+}
+
+@keyframes particleDrift {
+  0% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-30px) translateX(15px) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-60px) translateX(-10px) rotate(360deg);
+    opacity: 0.2;
+  }
+}
+
+.animate-float-3d {
+  animation: float3d 6s ease-in-out infinite;
+}
+
+.animate-float-shadow {
+  animation: floatShadow 6s ease-in-out infinite;
+}
+
+.animate-orbit-spin {
+  animation: orbitSpin 18s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.animate-float-badge-1 {
+  animation: floatBadge1 4s ease-in-out infinite;
+}
+
+.animate-float-badge-2 {
+  animation: floatBadge2 5s ease-in-out infinite;
+}
+
+.animate-shimmer-sweep {
+  animation: shimmerSweep 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

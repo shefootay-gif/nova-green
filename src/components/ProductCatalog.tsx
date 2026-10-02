@@ -231,11 +231,15 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
 
                     {/* Visual Product Representation */}
                     {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 relative z-10"
-                      />
+                      <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 ease-out relative z-10 drop-shadow-md"
+                        />
+                        {/* Shimmer sweep effect on card hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none z-20"></div>
+                      </div>
                     ) : (
                       /* High-end Styled Brand Container */
                       <div className="relative z-10 flex flex-col items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
@@ -327,10 +331,10 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                         {/* Quick View Button */}
                         <button
                           onClick={() => onSelectProduct?.(product)}
-                          className="col-span-1 p-2.5 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer"
+                          className="col-span-1 p-2.5 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer group/info"
                           title="عرض المواصفات الفنية الكاملة"
                         >
-                          <Info className="w-4 h-4" />
+                          <Info className="w-4 h-4 group-hover/info:scale-110 transition-transform" />
                         </button>
 
                         {/* WhatsApp Order Button */}
@@ -338,9 +342,10 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                           href={createWhatsAppLink(product)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="col-span-4 inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#25D366]/20 hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                          className="col-span-4 relative overflow-hidden inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1eb755] hover:from-[#20ba59] hover:to-[#179644] text-white font-black text-xs sm:text-sm shadow-md shadow-[#25D366]/25 hover:shadow-xl hover:shadow-[#25D366]/35 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer group/btn"
                         >
-                          <MessageCircle className="w-4 h-4 fill-white text-transparent shrink-0" />
+                          <div className="absolute inset-0 w-1/2 h-full bg-white/25 skew-x-12 -translate-x-full group-hover/btn:translate-x-[300%] transition-transform duration-700 pointer-events-none"></div>
+                          <MessageCircle className="w-4 h-4 fill-white text-transparent shrink-0 group-hover/btn:rotate-12 transition-transform duration-300" />
                           <span>اضغط للطلب</span>
                         </a>
                       </div>

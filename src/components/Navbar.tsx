@@ -41,13 +41,17 @@ export const Navbar: FC<NavbarProps> = ({
           {/* Logo */}
           <div 
             onClick={onNavigateHome}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer group py-2"
+            style={{ perspective: '600px' }}
           >
-            <img 
-              src="/logo.png" 
-              alt="Nova Green - نوفا جرين" 
-              className="h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
-            />
+            <div className="relative transform transition-all duration-300 group-hover:[transform:rotateX(8deg)_rotateY(-12deg)_scale(1.08)]">
+              <img 
+                src="/logo.png" 
+                alt="Nova Green - نوفا جرين" 
+                className="h-14 w-auto object-contain drop-shadow-xs group-hover:drop-shadow-[0_8px_16px_rgba(136,192,37,0.35)] transition-all duration-300" 
+              />
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#22A3E2]/0 via-[#88C025]/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300 pointer-events-none"></div>
+            </div>
           </div>
 
           {/* Desktop Navigation */}

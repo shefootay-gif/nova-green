@@ -1,7 +1,7 @@
 import type { Product, SafeUser, CompanySettings } from '../types';
 import { INITIAL_PRODUCTS } from '../data/initialProducts';
 
-const PRODUCTS_STORAGE_KEY = 'nova_green_products_v1';
+const PRODUCTS_STORAGE_KEY = 'nova_green_products_v3';
 const SETTINGS_STORAGE_KEY = 'nova_green_settings_v1';
 const AUTH_TOKEN_KEY = 'nova_green_admin_session';
 
@@ -36,7 +36,23 @@ export const StorageService = {
         localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(INITIAL_PRODUCTS));
         return INITIAL_PRODUCTS;
       }
-      return JSON.parse(stored);
+      const parsed: Product[] = JSON.parse(stored);
+      // Ensure existing default products have their images populated
+      let updated = false;
+      const enriched = parsed.map(item => {
+        if (!item.imageUrl) {
+          const match = INITIAL_PRODUCTS.find(p => p.id === item.id || p.name === item.name);
+          if (match?.imageUrl) {
+            updated = true;
+            return { ...item, imageUrl: match.imageUrl };
+          }
+        }
+        return item;
+      });
+      if (updated) {
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(enriched));
+      }
+      return enriched;
     } catch {
       return INITIAL_PRODUCTS;
     }
