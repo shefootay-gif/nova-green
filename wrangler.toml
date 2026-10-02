@@ -1,0 +1,11 @@
+name = "nova-green"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-28"
+
+# Optional Cloudflare D1 Database Binding (Free Tier)
+# To create D1 database: npx wrangler d1 create nova-green-db
+# Then put database_id below:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "nova-green-db"
+# database_id = "<YOUR_D1_DATABASE_ID>"

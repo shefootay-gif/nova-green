@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --brand-green: #88C025;
+    --brand-green-hover: #75a71e;
+    --brand-green-light: #f2f9e8;
+    --brand-blue: #22A3E2;
+    --brand-blue-hover: #1b8ec5;
+    --brand-blue-light: #eaf6fc;
+    --brand-dark: #13331c;
+    --brand-surface: #f9fbf8;
+  }
+
+  body {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fcfdfc;
+    color: #1f2937;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #88C025;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #75a71e;
+}
