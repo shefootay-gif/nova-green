@@ -1,5 +1,5 @@
 import { useState, useMemo, type FC } from 'react';
-import { Search, Filter, MessageCircle, AlertCircle, Sparkles, Info } from 'lucide-react';
+import { Search, Filter, MessageCircle, Sparkles, Info, Tag, CheckCircle2 } from 'lucide-react';
 import type { Product } from '../types';
 
 interface ProductCatalogProps {
@@ -44,206 +44,323 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
     });
   }, [products, searchTerm, selectedCategory]);
 
-  const getCategoryColor = (cat: string) => {
+  const getCategoryTheme = (cat: string) => {
     if (cat.includes('حشري') || cat.includes('أكاروسي')) {
-      return 'bg-amber-50 text-amber-700 border-amber-200/60';
+      return {
+        badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
+        glow: 'from-amber-500/10 to-transparent',
+        accentColor: '#d97706',
+      };
     }
     if (cat.includes('فطري') || cat.includes('أعفان')) {
-      return 'bg-purple-50 text-purple-700 border-purple-200/60';
+      return {
+        badgeBg: 'bg-purple-50 text-purple-800 border-purple-200',
+        glow: 'from-purple-500/10 to-transparent',
+        accentColor: '#9333ea',
+      };
     }
     if (cat.includes('طحالب') || cat.includes('أحماض') || cat.includes('هيوميك') || cat.includes('فولفيك')) {
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200/60';
+      return {
+        badgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        glow: 'from-emerald-500/10 to-transparent',
+        accentColor: '#059669',
+      };
     }
     if (cat.includes('كالسيوم') || cat.includes('ملوحة') || cat.includes('نيماتودا')) {
-      return 'bg-blue-50 text-blue-700 border-blue-200/60';
+      return {
+        badgeBg: 'bg-blue-50 text-blue-800 border-blue-200',
+        glow: 'from-blue-500/10 to-transparent',
+        accentColor: '#2563eb',
+      };
     }
-    return 'bg-[#f2f9e8] text-[#4c7412] border-[#88C025]/30';
+    return {
+      badgeBg: 'bg-[#f2f9e8] text-[#3e660e] border-[#88C025]/30',
+      glow: 'from-[#88C025]/10 to-transparent',
+      accentColor: '#88C025',
+    };
   };
 
   const createWhatsAppLink = (product: Product) => {
     const raw = whatsappNumber.replace(/[^0-9]/g, '');
     const cleanNum = raw.startsWith('0') ? '2' + raw : raw;
 
+    const priceText = product.price ? `بسعر: ${product.price} ج.م (${product.unit || 'عبوة'})` : '';
     const text = encodeURIComponent(
-      `السلام عليكم، أود طلب منتج (${product.name}) - التصنيف: ${product.category} - المادة الفعالة: ${product.activeIngredient} من شركة نوفا جرين`
+      `السلام عليكم، أود طلب منتج (${product.name}) ${priceText} - المادة الفعالة: ${product.activeIngredient} من شركة نوفا جرين`
     );
     return `https://wa.me/${cleanNum}?text=${text}`;
   };
 
   return (
-    <section id="catalog" className="py-16 bg-white border-t border-gray-100">
-      <div className="max-w-4xl mx-auto px-4">
+    <section id="catalog" className="py-20 bg-gradient-to-b from-white via-[#f7faf6] to-white border-t border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f2f9e8] text-[#4c7412] text-xs font-bold mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-[#88C025]" />
-            <span>دليل المنتجات والمبيدات الزراعية</span>
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f2f9e8] border border-[#88C025]/40 text-[#3b630b] text-xs font-black mb-4 shadow-2xs">
+            <Sparkles className="w-4 h-4 text-[#88C025]" />
+            <span>كتالوج المنتجات والمبيدات المعتمدة</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-2">كتالوج منتجاتنا</h2>
-          <p className="text-sm sm:text-base text-gray-500 font-medium max-w-xl mx-auto">
-            منتجات Nova Green للمغذيات وحماية المحاصيل – اضغط على أي منتج لعرض تفاصيله الفنية
+
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4 tracking-tight">
+            حلول غذائية ووقائية <span className="text-[#88C025]">بأعلى معايير الجودة</span>
+          </h2>
+
+          <p className="text-base sm:text-lg text-gray-600 font-medium">
+            تصفح قائمة منتجات Nova Green المتطورة، أسعار تنافسية ومواصفات فنية دقيقة لخدمة مزارعك.
           </p>
         </div>
 
-        {/* Filter & Search Bar matching video */}
-        <div className="bg-[#f9fbf8] p-4 sm:p-5 rounded-2xl border border-gray-200/80 mb-6 shadow-xs space-y-4">
-          <div className="relative">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="ابحث باسم المنتج أو المادة الفعالة..."
-              className="w-full bg-white border border-gray-200 rounded-xl py-3.5 pr-11 pl-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#88C025] focus:border-transparent transition-all shadow-2xs"
-            />
-            <Search className="w-5 h-5 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full"
-              >
-                مسح
-              </button>
-            )}
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-            {/* Category Dropdown */}
+        {/* Filter & Search Bar */}
+        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-gray-200/80 shadow-md shadow-gray-100 mb-10 space-y-4">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            {/* Search Input */}
             <div className="relative flex-1">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="ابحث باسم المنتج أو المادة الفعالة (مثال: شامل، اسيتامبريد، ابامكتين...)"
+                className="w-full bg-[#f9fbf8] border border-gray-200 rounded-2xl py-3.5 pr-12 pl-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#88C025] focus:bg-white transition-all shadow-2xs"
+              />
+              <Search className="w-5 h-5 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-200/70 px-2.5 py-1 rounded-full cursor-pointer"
+                >
+                  مسح
+                </button>
+              )}
+            </div>
+
+            {/* Category Dropdown */}
+            <div className="relative md:w-72">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full appearance-none bg-white border border-gray-200 rounded-xl py-2.5 pr-10 pl-4 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#88C025] cursor-pointer shadow-2xs"
+                className="w-full appearance-none bg-[#f9fbf8] border border-gray-200 rounded-2xl py-3.5 pr-11 pl-4 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#88C025] cursor-pointer shadow-2xs"
               >
-                <option value="all">كل التصنيفات ({products.length})</option>
+                <option value="all">كل التصنيفات ({products.length} منتج)</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
                 ))}
               </select>
-              <Filter className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Filter className="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
+          </div>
 
-            {/* Product Counter Badge */}
-            <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-white rounded-xl border border-gray-200 text-xs sm:text-sm font-bold text-gray-600 shrink-0">
-              <span className="w-2 h-2 rounded-full bg-[#88C025]"></span>
-              <span>{filteredProducts.length} منتج</span>
-            </div>
+          {/* Quick Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-2 scrollbar-none">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                selectedCategory === 'all'
+                  ? 'bg-[#13331c] text-white shadow-sm'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              }`}
+            >
+              الكل ({products.length})
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  selectedCategory === cat
+                    ? 'bg-[#88C025] text-white shadow-sm'
+                    : 'bg-[#f2f9e8] text-gray-700 hover:bg-[#e4f5d2]'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Products List (Layout matching the video exactly) */}
+        {/* Products Grid: 3 or 4 Columns of Rich Cards */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-16 bg-[#f9fbf8] rounded-2xl border border-dashed border-gray-200">
-            <p className="text-base font-bold text-gray-600 mb-2">لا توجد منتجات مطابقة للبحث</p>
-            <p className="text-sm text-gray-400 mb-4">جرب البحث بكلمات أخرى أو اختر "كل التصنيفات"</p>
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200 p-8">
+            <p className="text-xl font-black text-gray-700 mb-2">لا توجد منتجات مطابقة لبحثك</p>
+            <p className="text-sm text-gray-500 mb-6">جرب البحث بكلمات أخرى أو اختر "كل التصنيفات"</p>
             <button
               onClick={() => {
                 setSearchTerm('');
                 setSelectedCategory('all');
               }}
-              className="text-xs font-bold text-[#88C025] hover:underline"
+              className="px-6 py-2.5 bg-[#88C025] text-white text-xs font-bold rounded-xl shadow-xs hover:bg-[#75a91e] transition-colors cursor-pointer"
             >
-              إعادة تعيين الفلاتر
+              عرض كافة المنتجات
             </button>
           </div>
         ) : (
-          <div className="space-y-3.5">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-2xl p-5 border border-gray-100/90 shadow-sm hover:shadow-md transition-all hover:border-[#88C025]/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
-              >
-                {/* Right: Badge / Product Thumbnail & Name & Ingredients */}
-                <div 
-                  onClick={() => onSelectProduct?.(product)}
-                  className="flex items-start gap-4 flex-1 cursor-pointer"
-                >
-                  {/* Thumbnail / NG Logo Badge */}
-                  <div className="w-14 h-14 rounded-2xl bg-[#f2f9e8] border border-[#88C025]/30 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs group-hover:scale-105 transition-transform">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-sm font-black text-[#88C025] tracking-wider">NG</span>
-                    )}
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => {
+              const theme = getCategoryTheme(product.category);
+              const discount =
+                product.price && product.oldPrice
+                  ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
+                  : null;
 
-                  {/* Info */}
-                  <div className="space-y-1">
-                    {/* Category pill */}
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${getCategoryColor(
-                          product.category
-                        )}`}
-                      >
+              return (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-3xl border border-gray-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group hover:border-[#88C025]/50 hover:-translate-y-1.5"
+                >
+                  {/* Top Image Showcase Area */}
+                  <div 
+                    onClick={() => onSelectProduct?.(product)}
+                    className="relative h-52 bg-gradient-to-br from-[#f8fbf6] via-[#eef6ec] to-[#e6f3fa] p-5 flex items-center justify-center cursor-pointer overflow-hidden"
+                  >
+                    {/* Background glow circle */}
+                    <div className="absolute w-36 h-36 rounded-full bg-white/70 blur-md pointer-events-none"></div>
+
+                    {/* Top Badges */}
+                    <div className="absolute top-3.5 right-3.5 left-3.5 flex items-center justify-between z-10">
+                      <span className={`text-[11px] font-black px-3 py-1 rounded-full border shadow-2xs backdrop-blur-md ${theme.badgeBg}`}>
                         {product.category}
                       </span>
-                      {product.badge && product.badge !== product.category && (
-                        <span className="text-[10px] font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                          {product.badge}
+
+                      {discount && (
+                        <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-red-500 text-white shadow-xs">
+                          خصم {discount}%
                         </span>
                       )}
                     </div>
 
-                    {/* Product Name */}
-                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#88C025] transition-colors">
-                      {product.name}
-                    </h3>
+                    {/* Visual Product Representation */}
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 relative z-10"
+                      />
+                    ) : (
+                      /* High-end Styled Brand Container */
+                      <div className="relative z-10 flex flex-col items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
+                        {/* Styled Bottle/Bag Graphic */}
+                        <div className="w-24 h-28 rounded-2xl bg-white border-2 border-[#88C025]/40 shadow-lg flex flex-col items-center justify-center p-2 relative overflow-hidden">
+                          {/* Top cap */}
+                          <div className="w-8 h-2 bg-[#22A3E2] rounded-t-sm absolute top-0"></div>
+                          
+                          {/* Brand circular badge */}
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#22A3E2] to-[#88C025] flex items-center justify-center text-white font-black text-sm shadow-sm mb-1">
+                            NG
+                          </div>
+                          
+                          <span className="text-[10px] font-black text-gray-900 line-clamp-1">
+                            {product.name}
+                          </span>
+                          <span className="text-[8px] font-bold text-[#88C025] uppercase">
+                            Nova Green
+                          </span>
+                        </div>
 
-                    {/* Active ingredient / details */}
-                    <p className="text-xs sm:text-sm text-gray-500 font-medium">
-                      {product.activeIngredient.startsWith('المادة الفعالة') ||
-                      product.activeIngredient.startsWith('المواد الفعالة')
-                        ? product.activeIngredient
-                        : `المادة الفعالة: ${product.activeIngredient}`}
-                    </p>
+                        {/* Subtle Reflection Shadow */}
+                        <div className="w-16 h-2 bg-gray-400/20 rounded-full blur-xs mt-2"></div>
+                      </div>
+                    )}
 
-                    {product.description && (
-                      <p className="text-xs text-gray-400 line-clamp-1 max-w-lg pt-0.5">
-                        {product.description}
-                      </p>
+                    {/* Unit Tag Bottom Right */}
+                    {product.unit && (
+                      <div className="absolute bottom-3 right-3 text-[11px] font-bold text-gray-600 bg-white/90 backdrop-blur-xs px-2.5 py-0.5 rounded-lg border border-gray-200/60 shadow-2xs z-10">
+                        {product.unit}
+                      </div>
                     )}
                   </div>
-                </div>
 
-                {/* Left: Action Buttons (Details + Order Button via WhatsApp) */}
-                <div className="w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 flex items-center justify-end gap-2">
-                  <button
-                    onClick={() => onSelectProduct?.(product)}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 px-3 py-2.5 rounded-xl border border-gray-200/80 transition-colors cursor-pointer"
-                    title="عرض البطاقة الفنية للمنتج"
-                  >
-                    <Info className="w-3.5 h-3.5 text-gray-400" />
-                    <span>التفاصيل</span>
-                  </button>
+                  {/* Card Content */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      {/* Product Name */}
+                      <h3 
+                        onClick={() => onSelectProduct?.(product)}
+                        className="text-xl font-black text-gray-900 group-hover:text-[#88C025] transition-colors cursor-pointer"
+                      >
+                        {product.name}
+                      </h3>
 
-                  <a
-                    href={createWhatsAppLink(product)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 text-xs font-bold text-white bg-[#25D366] hover:bg-[#20ba59] px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs hover:shadow-md transform hover:-translate-y-0.5"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>اضغط للطلب</span>
-                  </a>
+                      {/* Active Ingredient Tag */}
+                      <div className="inline-flex items-center gap-1.5 text-xs text-gray-600 font-semibold bg-[#f4f7f2] px-2.5 py-1 rounded-lg border border-gray-100 w-full">
+                        <Tag className="w-3.5 h-3.5 text-[#22A3E2] shrink-0" />
+                        <span className="line-clamp-1">
+                          {product.activeIngredient.startsWith('المادة') || product.activeIngredient.startsWith('المواد')
+                            ? product.activeIngredient
+                            : `المادة: ${product.activeIngredient}`}
+                        </span>
+                      </div>
+
+                      {/* Description Preview */}
+                      <p className="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed">
+                        {product.description || 'مركب عالي الجودة والفاعلية مخصص لحماية وتغذية المحاصيل.'}
+                      </p>
+                    </div>
+
+                    {/* Price and Action Section */}
+                    <div className="pt-3 border-t border-gray-100 space-y-3">
+                      {/* Price Tag */}
+                      <div className="flex items-baseline justify-between">
+                        <div>
+                          <span className="text-xs text-gray-400 font-bold block">السعر:</span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-2xl font-black text-[#13331c]">
+                              {product.price || 280} <span className="text-sm font-bold text-[#88C025]">ج.م</span>
+                            </span>
+                            {product.oldPrice && (
+                              <del className="text-xs text-gray-400 font-bold">
+                                {product.oldPrice} ج.م
+                              </del>
+                            )}
+                          </div>
+                        </div>
+
+                        {product.badge && (
+                          <span className="text-[10px] font-extrabold text-[#386208] bg-[#f2f9e8] px-2 py-0.5 rounded-md border border-[#88C025]/30">
+                            {product.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-5 gap-2">
+                        {/* Quick View Button */}
+                        <button
+                          onClick={() => onSelectProduct?.(product)}
+                          className="col-span-1 p-2.5 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer"
+                          title="عرض المواصفات الفنية الكاملة"
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+
+                        {/* WhatsApp Order Button */}
+                        <a
+                          href={createWhatsAppLink(product)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="col-span-4 inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#25D366]/20 hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                        >
+                          <MessageCircle className="w-4 h-4 fill-white text-transparent shrink-0" />
+                          <span>اضغط للطلب</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {/* Disclaimer Note (Exactly as in video frame 00:18) */}
-        <div className="mt-10 bg-[#f9fbf8] border border-gray-200/70 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 text-xs text-gray-500 leading-relaxed font-medium">
-          <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-          <p>
-            <strong className="text-gray-700 ml-1">ملاحظة هامة:</strong>
-            هذه البيانات مبدئية حسب المعلومات المرسلة، ولا تغني عن مراجعة ملصق العبوة والتسجيل الرسمي لوزارة الزراعة قبل الاستخدام.
-          </p>
+        {/* Disclaimer Note */}
+        <div className="mt-14 bg-white border border-gray-200/80 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row items-center gap-4 text-xs sm:text-sm text-gray-600 font-medium">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div className="flex-1 text-center sm:text-right">
+            <strong className="text-gray-900 block mb-0.5">ضمان الجودة والتسجيل الرسمي:</strong>
+            كافة المنتجات والمركبات مختارة وفق أعلى معايير الجودة ومطابقة للتوصيات الفنية المعتمدة لوزارة الزراعة المصرية لتحقيق أعلى إنتاجية لمحصولك.
+          </div>
         </div>
       </div>
     </section>

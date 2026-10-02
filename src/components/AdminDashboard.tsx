@@ -55,6 +55,9 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
   const [formActiveIngredient, setFormActiveIngredient] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formUsage, setFormUsage] = useState('');
+  const [formPrice, setFormPrice] = useState<number | ''>('');
+  const [formOldPrice, setFormOldPrice] = useState<number | ''>('');
+  const [formUnit, setFormUnit] = useState('عبوة 1 لتر');
   const [formImageUrl, setFormImageUrl] = useState('');
   const [formBadge, setFormBadge] = useState('');
   const [formIsActive, setFormIsActive] = useState(true);
@@ -97,6 +100,9 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
     setFormActiveIngredient('');
     setFormDescription('');
     setFormUsage('');
+    setFormPrice('');
+    setFormOldPrice('');
+    setFormUnit('عبوة 1 لتر');
     setFormImageUrl('');
     setFormBadge('');
     setFormIsActive(true);
@@ -118,6 +124,9 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
     setFormActiveIngredient(prod.activeIngredient);
     setFormDescription(prod.description || '');
     setFormUsage(prod.usage || '');
+    setFormPrice(prod.price || '');
+    setFormOldPrice(prod.oldPrice || '');
+    setFormUnit(prod.unit || 'عبوة 1 لتر');
     setFormImageUrl(prod.imageUrl || '');
     setFormBadge(prod.badge || '');
     setFormIsActive(prod.isActive);
@@ -172,6 +181,9 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
         activeIngredient: formActiveIngredient.trim(),
         description: formDescription.trim(),
         usage: formUsage.trim(),
+        price: formPrice ? Number(formPrice) : undefined,
+        oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
+        unit: formUnit.trim() || undefined,
         imageUrl: formImageUrl,
         badge: formBadge.trim() || finalCategory,
         isActive: formIsActive,
@@ -185,6 +197,9 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
         activeIngredient: formActiveIngredient.trim(),
         description: formDescription.trim(),
         usage: formUsage.trim(),
+        price: formPrice ? Number(formPrice) : undefined,
+        oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
+        unit: formUnit.trim() || undefined,
         imageUrl: formImageUrl,
         badge: formBadge.trim() || finalCategory,
         isActive: formIsActive,
@@ -467,6 +482,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                   <th className="py-3.5 px-4">المنتج</th>
                   <th className="py-3.5 px-4">التصنيف</th>
                   <th className="py-3.5 px-4">المادة الفعالة</th>
+                  <th className="py-3.5 px-4">السعر</th>
                   <th className="py-3.5 px-4 text-center">الحالة</th>
                   <th className="py-3.5 px-4 text-left">الإجراءات</th>
                 </tr>
@@ -474,7 +490,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
               <tbody className="divide-y divide-gray-100 font-medium text-gray-700">
                 {displayedProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-gray-400">
+                    <td colSpan={6} className="py-12 text-center text-gray-400">
                       لا توجد منتجات مطابقة لخيارات البحث
                     </td>
                   </tr>
@@ -514,6 +530,18 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                         <span className="text-xs text-gray-600 font-semibold">
                           {p.activeIngredient}
                         </span>
+                      </td>
+
+                      {/* Price */}
+                      <td className="py-3.5 px-4">
+                        {p.price ? (
+                          <div className="flex flex-col">
+                            <span className="text-xs font-black text-gray-900">{p.price} ج.م</span>
+                            {p.unit && <span className="text-[10px] text-gray-400 font-medium">{p.unit}</span>}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">-</span>
+                        )}
                       </td>
 
                       {/* Status */}
@@ -677,6 +705,48 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                   placeholder="مثال: 100سم / 200 لتر ماء رشا للمكافحة..."
                   className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2 px-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#88C025]"
                 />
+              </div>
+
+              {/* Price & Unit Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#fcfdfa] p-3 rounded-2xl border border-gray-200/70">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    السعر الحالي (ج.م)
+                  </label>
+                  <input
+                    type="number"
+                    value={formPrice}
+                    onChange={(e) => setFormPrice(e.target.value ? Number(e.target.value) : '')}
+                    placeholder="مثال: 280"
+                    className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#88C025]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    السعر السابق (شطب)
+                  </label>
+                  <input
+                    type="number"
+                    value={formOldPrice}
+                    onChange={(e) => setFormOldPrice(e.target.value ? Number(e.target.value) : '')}
+                    placeholder="مثال: 330"
+                    className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#88C025]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    حجم العبوة
+                  </label>
+                  <input
+                    type="text"
+                    value={formUnit}
+                    onChange={(e) => setFormUnit(e.target.value)}
+                    placeholder="عبوة 1 لتر / 1 كجم"
+                    className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#88C025]"
+                  />
+                </div>
               </div>
 
               {/* Image Upload with Auto-Compression */}

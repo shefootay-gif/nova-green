@@ -4,6 +4,9 @@ export interface Product {
   category: string;
   activeIngredient: string;
   description: string;
+  price?: number;
+  oldPrice?: number;
+  unit?: string;
   usage?: string;
   imageUrl?: string;
   badge?: string;

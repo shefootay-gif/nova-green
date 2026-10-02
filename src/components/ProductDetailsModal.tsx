@@ -66,17 +66,38 @@ export const ProductDetailsModal: FC<ProductDetailsModalProps> = ({
             </div>
 
             <div className="text-center sm:text-right flex-1">
-              <h2 className="text-2xl font-black text-gray-900 mb-1">{product.name}</h2>
-              <div className="inline-flex items-center gap-1.5 text-xs text-gray-600 font-bold bg-white px-3 py-1 rounded-lg border border-gray-200/80 mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#88C025]" />
-                <span>
-                  {product.activeIngredient.startsWith('المادة الفعالة') || product.activeIngredient.startsWith('المواد الفعالة')
-                    ? product.activeIngredient
-                    : `المادة الفعالة: ${product.activeIngredient}`}
-                </span>
+              <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                <h2 className="text-2xl font-black text-gray-900">{product.name}</h2>
+                {product.price && (
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-black text-[#13331c]">
+                      {product.price} <span className="text-sm text-[#88C025]">ج.م</span>
+                    </span>
+                    {product.oldPrice && (
+                      <del className="text-xs text-gray-400 font-bold">{product.oldPrice} ج.م</del>
+                    )}
+                  </div>
+                )}
               </div>
+
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                <div className="inline-flex items-center gap-1.5 text-xs text-gray-700 font-bold bg-white px-3 py-1 rounded-lg border border-gray-200/80">
+                  <Sparkles className="w-3.5 h-3.5 text-[#88C025]" />
+                  <span>
+                    {product.activeIngredient.startsWith('المادة') || product.activeIngredient.startsWith('المواد')
+                      ? product.activeIngredient
+                      : `المادة: ${product.activeIngredient}`}
+                  </span>
+                </div>
+                {product.unit && (
+                  <span className="text-xs font-bold text-gray-500 bg-white px-2.5 py-1 rounded-lg border border-gray-200/80">
+                    {product.unit}
+                  </span>
+                )}
+              </div>
+
               <p className="text-xs text-gray-500">
-                منتج عالي الجودة ومعتمد لخدمة المزارعين وتغذية وحماية المحاصيل.
+                مركب عالي الفاعلية والجودة مخصص لحماية وتغذية المحاصيل الزراعية.
               </p>
             </div>
           </div>
