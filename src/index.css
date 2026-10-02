@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'El Messiri', 'Cairo', system-ui, -apple-system, sans-serif;
+}
+
 @layer base {
   :root {
     --brand-green: #88C025;
@@ -12,8 +16,11 @@
     --brand-surface: #f9fbf8;
   }
 
+  body, button, input, select, textarea {
+    font-family: 'El Messiri', 'Cairo', system-ui, -apple-system, sans-serif;
+  }
+
   body {
-    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #fcfdfc;
     color: #1f2937;
     margin: 0;
