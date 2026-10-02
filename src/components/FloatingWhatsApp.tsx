@@ -6,9 +6,12 @@ interface FloatingWhatsAppProps {
 }
 
 export const FloatingWhatsApp: FC<FloatingWhatsAppProps> = ({
-  phoneNumber = '201131603110',
+  phoneNumber = '011 31603110',
 }) => {
-  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+  const raw = phoneNumber.replace(/[^0-9]/g, '');
+  const cleanPhone = raw.startsWith('0') ? '2' + raw : raw;
+
+  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
     'السلام عليكم، أود التواصل مع شركة نوفا جرين والطلب من المنتجات الزراعية'
   )}`;
 

@@ -1,11 +1,16 @@
 import type { FC } from 'react';
 import { Phone, Mail, MessageCircle, Shield } from 'lucide-react';
+import type { CompanySettings } from '../types';
 
 interface FooterProps {
+  settings: CompanySettings;
   onOpenAdmin: () => void;
 }
 
-export const Footer: FC<FooterProps> = ({ onOpenAdmin }) => {
+export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
+  const rawPhone = settings.whatsapp.replace(/[^0-9]/g, '');
+  const cleanPhone = rawPhone.startsWith('0') ? '2' + rawPhone : rawPhone;
+
   return (
     <footer id="contact" className="bg-[#13331c] text-white pt-16 pb-12 border-t border-emerald-950">
       <div className="max-w-5xl mx-auto px-4 text-center">
@@ -17,9 +22,9 @@ export const Footer: FC<FooterProps> = ({ onOpenAdmin }) => {
 
         {/* Contact Quick Buttons Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-          {/* WhatsApp Button (011 31603110) */}
+          {/* WhatsApp Button */}
           <a
-            href="https://wa.me/201131603110?text=السلام%20عليكم%20،%20أود%20طلب%20منتجات%20من%20شركة%20نوفا%20جرين"
+            href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent('السلام عليكم ، أود طلب منتجات من شركة نوفا جرين')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-3 bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/30 rounded-2xl p-4 transition-all hover:-translate-y-0.5 group"
@@ -29,13 +34,13 @@ export const Footer: FC<FooterProps> = ({ onOpenAdmin }) => {
             </div>
             <div className="text-right">
               <span className="block text-[11px] text-emerald-300 font-medium">واتساب للطلب السريع</span>
-              <span className="text-sm font-bold text-white dir-ltr text-right">011 31603110</span>
+              <span className="text-sm font-bold text-white dir-ltr text-right">{settings.whatsapp}</span>
             </div>
           </a>
 
-          {/* Phone Call (011 31603110) */}
+          {/* Phone Call */}
           <a
-            href="tel:+201131603110"
+            href={`tel:${settings.phone.replace(/[^0-9+]/g, '')}`}
             className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl p-4 transition-all hover:-translate-y-0.5 group"
           >
             <div className="w-10 h-10 rounded-xl bg-[#22A3E2]/20 flex items-center justify-center text-[#22A3E2] shrink-0 group-hover:scale-110 transition-transform">
@@ -43,13 +48,13 @@ export const Footer: FC<FooterProps> = ({ onOpenAdmin }) => {
             </div>
             <div className="text-right">
               <span className="block text-[11px] text-emerald-300 font-medium">اتصال هاتفي</span>
-              <span className="text-sm font-bold text-white dir-ltr text-right">011 31603110</span>
+              <span className="text-sm font-bold text-white dir-ltr text-right">{settings.phone}</span>
             </div>
           </a>
 
           {/* Facebook Official Page */}
           <a
-            href="https://www.facebook.com/share/1BurYZKAcy/"
+            href={settings.facebook}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-3 bg-[#1877F2]/20 hover:bg-[#1877F2]/30 border border-[#1877F2]/30 rounded-2xl p-4 transition-all hover:-translate-y-0.5 group"
@@ -67,7 +72,7 @@ export const Footer: FC<FooterProps> = ({ onOpenAdmin }) => {
 
           {/* Email */}
           <a
-            href="mailto:info@novagreen.com"
+            href={`mailto:${settings.email}`}
             className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl p-4 transition-all hover:-translate-y-0.5 group"
           >
             <div className="w-10 h-10 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-110 transition-transform">
@@ -75,7 +80,7 @@ export const Footer: FC<FooterProps> = ({ onOpenAdmin }) => {
             </div>
             <div className="text-right">
               <span className="block text-[11px] text-emerald-300 font-medium">البريد الإلكتروني</span>
-              <span className="text-sm font-bold text-white">info@novagreen.com</span>
+              <span className="text-sm font-bold text-white">{settings.email}</span>
             </div>
           </a>
         </div>
@@ -88,7 +93,7 @@ export const Footer: FC<FooterProps> = ({ onOpenAdmin }) => {
 
           <div className="flex items-center gap-4">
             <a
-              href="https://www.facebook.com/share/1BurYZKAcy/"
+              href={settings.facebook}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-300 hover:text-white transition-colors"

@@ -6,6 +6,7 @@ interface NavbarProps {
   isAdminLoggedIn: boolean;
   activeView: 'home' | 'admin';
   onNavigateHome: () => void;
+  whatsappNumber?: string;
 }
 
 export const Navbar: FC<NavbarProps> = ({
@@ -13,8 +14,11 @@ export const Navbar: FC<NavbarProps> = ({
   isAdminLoggedIn,
   activeView,
   onNavigateHome,
+  whatsappNumber = '011 31603110',
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const rawPhone = whatsappNumber.replace(/[^0-9]/g, '');
+  const cleanPhone = rawPhone.startsWith('0') ? '2' + rawPhone : rawPhone;
 
   const scrollTo = (id: string) => {
     if (activeView === 'admin') {
@@ -95,7 +99,7 @@ export const Navbar: FC<NavbarProps> = ({
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-3">
             <a
-              href="https://wa.me/201131603110?text=السلام%20عليكم%20،%20أود%20طلب%20استشارة%20زراعية%20من%20نوفا%20جرين"
+              href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent('السلام عليكم ، أود طلب استشارة زراعية من نوفا جرين')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-xs font-bold text-[#13331c] bg-[#f2f9e8] hover:bg-[#e4f5d3] border border-[#88C025]/30 px-3.5 py-2 rounded-full transition-all"
@@ -189,7 +193,7 @@ export const Navbar: FC<NavbarProps> = ({
 
           <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
             <a
-              href="https://wa.me/201131603110?text=السلام%20عليكم%20،%20أود%20طلب%20استشارة%20زراعية%20من%20نوفا%20جرين"
+              href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent('السلام عليكم ، أود طلب استشارة زراعية من نوفا جرين')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 text-sm font-bold text-[#13331c] bg-[#f2f9e8] py-2.5 rounded-xl border border-[#88C025]/30"

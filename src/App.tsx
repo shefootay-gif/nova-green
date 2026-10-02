@@ -8,20 +8,26 @@ import { Footer } from './components/Footer';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { FloatingWhatsApp } from './components/FloatingWhatsApp';
-import type { Product } from './types';
-import { StorageService } from './services/storage';
+import { ProductDetailsModal } from './components/ProductDetailsModal';
+import type { Product, CompanySettings } from './types';
+import { StorageService, DEFAULT_SETTINGS } from './services/storage';
 
 export function App() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [settings, setSettings] = useState<CompanySettings>(DEFAULT_SETTINGS);
   const [activeView, setActiveView] = useState<'home' | 'admin'>('home');
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [selectedProductModal, setSelectedProductModal] = useState<Product | null>(null);
 
   // Initialize data and check login
   useEffect(() => {
-    // Load products
+    // Load products & settings
     const initial = StorageService.getProducts();
     setProducts(initial);
+
+    const initialSettings = StorageService.getSettings();
+    setSettings(initialSettings);
 
     // Check auth
     const user = StorageService.getCurrentUser();
@@ -51,6 +57,11 @@ export function App() {
   const handleRefreshProducts = () => {
     const updated = StorageService.getProducts();
     setProducts(updated);
+  };
+
+  const handleRefreshSettings = () => {
+    const updatedSettings = StorageService.getSettings();
+    setSettings(updatedSettings);
   };
 
   const handleOpenAdmin = () => {
@@ -96,28 +107,48 @@ export function App() {
         isAdminLoggedIn={isAdminLoggedIn}
         activeView={activeView}
         onNavigateHome={handleNavigateHome}
+        whatsappNumber={settings.whatsapp}
       />
 
       {/* Main Content */}
       <main className="flex-1">
         {activeView === 'home' ? (
           <>
-            <Hero onExploreProducts={handleExploreProducts} />
+            <Hero 
+              onExploreProducts={handleExploreProducts} 
+              whatsappNumber={settings.whatsapp} 
+            />
             <Services />
-            <ProductCatalog products={products} />
+            <ProductCatalog
+              products={products}
+              whatsappNumber={settings.whatsapp}
+              onSelectProduct={(p) => setSelectedProductModal(p)}
+            />
             <AboutSection />
-            <Footer onOpenAdmin={handleOpenAdmin} />
-            <FloatingWhatsApp />
+            <Footer 
+              settings={settings} 
+              onOpenAdmin={handleOpenAdmin} 
+            />
+            <FloatingWhatsApp phoneNumber={settings.whatsapp} />
           </>
         ) : (
           <AdminDashboard
             products={products}
+            settings={settings}
             onRefreshProducts={handleRefreshProducts}
+            onRefreshSettings={handleRefreshSettings}
             onNavigateHome={handleNavigateHome}
             onLogout={handleLogout}
           />
         )}
       </main>
+
+      {/* Product Details Modal */}
+      <ProductDetailsModal
+        product={selectedProductModal}
+        onClose={() => setSelectedProductModal(null)}
+        settings={settings}
+      />
 
       {/* Admin Login Modal */}
       <AdminLoginModal

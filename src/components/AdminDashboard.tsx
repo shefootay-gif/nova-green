@@ -16,20 +16,30 @@ import {
   Layers,
   Sparkles,
   Eye,
+  Settings,
+  Phone,
+  MessageCircle,
+  Mail,
+  Share2,
 } from 'lucide-react';
-import type { Product } from '../types';
+import type { Product, CompanySettings } from '../types';
 import { StorageService } from '../services/storage';
+import { compressImage } from '../utils/imageCompressor';
 
 interface AdminDashboardProps {
   products: Product[];
+  settings: CompanySettings;
   onRefreshProducts: () => void;
+  onRefreshSettings: () => void;
   onNavigateHome: () => void;
   onLogout: () => void;
 }
 
 export const AdminDashboard: FC<AdminDashboardProps> = ({
   products,
+  settings,
   onRefreshProducts,
+  onRefreshSettings,
   onNavigateHome,
   onLogout,
 }) => {
@@ -44,10 +54,19 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
   const [customCategory, setCustomCategory] = useState('');
   const [formActiveIngredient, setFormActiveIngredient] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [formUsage, setFormUsage] = useState('');
   const [formImageUrl, setFormImageUrl] = useState('');
   const [formBadge, setFormBadge] = useState('');
   const [formIsActive, setFormIsActive] = useState(true);
   const [formError, setFormError] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
+
+  // Contact Settings State & Modal
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [settingsWhatsapp, setSettingsWhatsapp] = useState(settings.whatsapp);
+  const [settingsPhone, setSettingsPhone] = useState(settings.phone);
+  const [settingsFacebook, setSettingsFacebook] = useState(settings.facebook);
+  const [settingsEmail, setSettingsEmail] = useState(settings.email);
 
   // Password Change State
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -77,6 +96,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
     setCustomCategory('');
     setFormActiveIngredient('');
     setFormDescription('');
+    setFormUsage('');
     setFormImageUrl('');
     setFormBadge('');
     setFormIsActive(true);
@@ -97,6 +117,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
     }
     setFormActiveIngredient(prod.activeIngredient);
     setFormDescription(prod.description || '');
+    setFormUsage(prod.usage || '');
     setFormImageUrl(prod.imageUrl || '');
     setFormBadge(prod.badge || '');
     setFormIsActive(prod.isActive);
@@ -104,20 +125,21 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
     setIsModalOpen(true);
   };
 
-  // Handle Image Upload (Converts to Base64 preview)
-  const handleImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // Handle Image Upload with Automatic Client-Side Compression
+  const handleImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setFormError('حجم الصورة كبير، يفضل اختيار صورة أقل من 2 ميجابايت');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormImageUrl(reader.result as string);
+      try {
+        setIsCompressing(true);
         setFormError('');
-      };
-      reader.readAsDataURL(file);
+        // Automatically resize and compress image to keep storage ultra-lightweight
+        const compressedBase64 = await compressImage(file, 640, 640, 0.75);
+        setFormImageUrl(compressedBase64);
+      } catch {
+        setFormError('حدث خطأ أثناء معالجة الصورة، يرجى اختيار ملف صورة صالح');
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -149,11 +171,12 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
         category: finalCategory,
         activeIngredient: formActiveIngredient.trim(),
         description: formDescription.trim(),
+        usage: formUsage.trim(),
         imageUrl: formImageUrl,
         badge: formBadge.trim() || finalCategory,
         isActive: formIsActive,
       });
-      showToast('تم تحديث المنتج بنجاح');
+      showToast('تم تحديث بيانات المنتج بنجاح');
     } else {
       // Add
       StorageService.addProduct({
@@ -161,6 +184,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
         category: finalCategory,
         activeIngredient: formActiveIngredient.trim(),
         description: formDescription.trim(),
+        usage: formUsage.trim(),
         imageUrl: formImageUrl,
         badge: formBadge.trim() || finalCategory,
         isActive: formIsActive,
@@ -170,6 +194,21 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
 
     onRefreshProducts();
     setIsModalOpen(false);
+  };
+
+  // Save Settings
+  const handleSaveSettings = (e: FormEvent) => {
+    e.preventDefault();
+    StorageService.saveSettings({
+      ...settings,
+      whatsapp: settingsWhatsapp.trim(),
+      phone: settingsPhone.trim(),
+      facebook: settingsFacebook.trim(),
+      email: settingsEmail.trim(),
+    });
+    onRefreshSettings();
+    setIsSettingsModalOpen(false);
+    showToast('تم حفظ وتحديث بيانات التواصل بنجاح');
   };
 
   // Delete product
@@ -283,6 +322,21 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
               </button>
 
               <button
+                onClick={() => {
+                  setSettingsWhatsapp(settings.whatsapp);
+                  setSettingsPhone(settings.phone);
+                  setSettingsFacebook(settings.facebook);
+                  setSettingsEmail(settings.email);
+                  setIsSettingsModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-3 py-2.5 rounded-xl transition-all cursor-pointer"
+                title="تعديل أرقام الواتساب والفيسبوك والتواصل"
+              >
+                <Settings className="w-4 h-4 text-emerald-600" />
+                <span>بيانات التواصل</span>
+              </button>
+
+              <button
                 onClick={() => setIsPasswordModalOpen(true)}
                 className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-3 py-2.5 rounded-xl transition-all cursor-pointer"
                 title="تغيير كلمة المرور"
@@ -356,7 +410,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
             <div>
               <h4 className="text-sm font-bold text-white">متوافق 100% مع الخطة المجانية لـ Cloudflare Pages</h4>
               <p className="text-xs text-emerald-200/80">
-                الموقع مبني بهندسة فائقة السرعة، استضافة مجانية مدى الحياة، بلا تكاليف سيرفرات وباندويث غير محدود.
+                ضغط فوري للصور محلياً لمنع امتلاء الذاكرة، وباندويث غير محدود على Cloudflare مجاناً.
               </p>
             </div>
           </div>
@@ -518,14 +572,14 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
       {/* Add / Edit Product Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-3xl w-full max-w-xl p-6 sm:p-8 shadow-2xl border border-gray-100 my-8 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-xl p-6 sm:p-8 shadow-2xl border border-gray-100 my-8 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
               <div>
                 <h3 className="text-xl font-black text-gray-900">
                   {editingProduct ? 'تعديل بيانات المنتج' : 'إضافة منتج زراعي جديد'}
                 </h3>
                 <p className="text-xs text-gray-400">
-                  {editingProduct ? `تعديل (${editingProduct.name})` : 'أدخل بيانات المنتج ومادته الفعالة'}
+                  {editingProduct ? `تعديل (${editingProduct.name})` : 'أدخل بيانات المنتج ومادته الفعالة ومواصفاته'}
                 </p>
               </div>
               <button
@@ -600,25 +654,41 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
               {/* Description */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  الوصف والمواصفات (اختياري)
+                  الوصف والمواصفات الفنية
                 </label>
                 <textarea
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
                   rows={2}
-                  placeholder="نبذة عن فوائد المنتج أو الجرعة وطريقة الاستخدام..."
+                  placeholder="نبذة عن فوائد وخصائص المركب..."
                   className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2 px-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#88C025]"
                 ></textarea>
               </div>
 
-              {/* Image Upload */}
+              {/* Usage & Dose */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  صورة المنتج (رفع ملف أو رابط)
+                  طريقة ومجال الاستخدام والجرعة (اختياري)
+                </label>
+                <input
+                  type="text"
+                  value={formUsage}
+                  onChange={(e) => setFormUsage(e.target.value)}
+                  placeholder="مثال: 100سم / 200 لتر ماء رشا للمكافحة..."
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2 px-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#88C025]"
+                />
+              </div>
+
+              {/* Image Upload with Auto-Compression */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                  صورة المنتج (يتم ضغطها تلقائياً لحفظ السرعة)
                 </label>
                 <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-2xl bg-[#f2f9e8] border border-[#88C025]/30 flex items-center justify-center shrink-0 overflow-hidden">
-                    {formImageUrl ? (
+                  <div className="w-16 h-16 rounded-2xl bg-[#f2f9e8] border border-[#88C025]/30 flex items-center justify-center shrink-0 overflow-hidden relative">
+                    {isCompressing ? (
+                      <span className="text-[10px] text-gray-400 font-bold">جاري الضغط...</span>
+                    ) : formImageUrl ? (
                       <img src={formImageUrl} alt="معاينة" className="w-full h-full object-cover" />
                     ) : (
                       <ImageIcon className="w-6 h-6 text-[#88C025]" />
@@ -630,10 +700,11 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer"
+                        disabled={isCompressing}
+                        className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer disabled:opacity-50"
                       >
                         <Upload className="w-3.5 h-3.5 text-[#22A3E2]" />
-                        <span>رفع صورة من الجهاز</span>
+                        <span>{isCompressing ? 'معالجة الصورة...' : 'رفع صورة من جهازك'}</span>
                       </button>
 
                       {formImageUrl && (
@@ -658,7 +729,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                       type="text"
                       value={formImageUrl}
                       onChange={(e) => setFormImageUrl(e.target.value)}
-                      placeholder="أو الصق رابط صورة خارجية مباشرة..."
+                      placeholder="أو ضع رابط صورة خارجي مباشر..."
                       className="w-full bg-[#f9fbf8] border border-gray-200 rounded-lg py-1.5 px-3 text-xs focus:outline-none focus:ring-1 focus:ring-[#88C025]"
                     />
                   </div>
@@ -698,9 +769,107 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 text-xs font-bold bg-[#88C025] hover:bg-[#74a51e] text-white rounded-xl shadow-xs transition-all cursor-pointer"
+                  disabled={isCompressing}
+                  className="px-6 py-2.5 text-xs font-bold bg-[#88C025] hover:bg-[#74a51e] text-white rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
                 >
                   {editingProduct ? 'حفظ التعديلات' : 'إضافة المنتج'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Settings Modal */}
+      {isSettingsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 sm:p-8 shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
+              <div>
+                <h3 className="text-xl font-black text-gray-900">إعدادات التواصل والروابط</h3>
+                <p className="text-xs text-gray-400">تحديث أرقام الواتساب والاتصال وصفحة الفيسبوك</p>
+              </div>
+              <button
+                onClick={() => setIsSettingsModalOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSettings} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+                  <span>رقم الواتساب للطلب</span>
+                </label>
+                <input
+                  type="text"
+                  value={settingsWhatsapp}
+                  onChange={(e) => setSettingsWhatsapp(e.target.value)}
+                  placeholder="مثال: 011 31603110"
+                  required
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#88C025] text-left dir-ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#22A3E2]" />
+                  <span>رقم الاتصال الهاتفي المباشر</span>
+                </label>
+                <input
+                  type="text"
+                  value={settingsPhone}
+                  onChange={(e) => setSettingsPhone(e.target.value)}
+                  placeholder="مثال: 011 31603110"
+                  required
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#88C025] text-left dir-ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5 text-[#1877F2]" />
+                  <span>رابط صفحة فيسبوك</span>
+                </label>
+                <input
+                  type="url"
+                  value={settingsFacebook}
+                  onChange={(e) => setSettingsFacebook(e.target.value)}
+                  placeholder="https://www.facebook.com/..."
+                  required
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#88C025] text-left dir-ltr"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-amber-500" />
+                  <span>البريد الإلكتروني</span>
+                </label>
+                <input
+                  type="email"
+                  value={settingsEmail}
+                  onChange={(e) => setSettingsEmail(e.target.value)}
+                  placeholder="info@novagreen.com"
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#88C025] text-left dir-ltr"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsSettingsModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl cursor-pointer"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 text-xs font-bold bg-[#13331c] text-white rounded-xl hover:bg-[#1a4426] cursor-pointer"
+                >
+                  حفظ البيانات
                 </button>
               </div>
             </form>

@@ -1,8 +1,19 @@
-import type { Product, SafeUser } from '../types';
+import type { Product, SafeUser, CompanySettings } from '../types';
 import { INITIAL_PRODUCTS } from '../data/initialProducts';
 
 const PRODUCTS_STORAGE_KEY = 'nova_green_products_v1';
+const SETTINGS_STORAGE_KEY = 'nova_green_settings_v1';
 const AUTH_TOKEN_KEY = 'nova_green_admin_session';
+
+export const DEFAULT_SETTINGS: CompanySettings = {
+  companyName: 'نوفا جرين',
+  tagline: 'حلول زراعية • جودة • ثقة',
+  phone: '011 31603110',
+  whatsapp: '011 31603110',
+  facebook: 'https://www.facebook.com/share/1BurYZKAcy/',
+  email: 'info@novagreen.com',
+  address: 'جمهورية مصر العربية - خدمة المزارعين في كافة المحافظات',
+};
 
 // Pre-computed SHA-256 hash for default password: "admin123"
 // Generated via SHA-256 of "admin123"
@@ -127,5 +138,27 @@ export const StorageService = {
     const newHash = await sha256(newPassword);
     localStorage.setItem('nova_green_admin_hash', newHash);
     return true;
+  },
+
+  // Company Settings
+  getSettings(): CompanySettings {
+    try {
+      const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (!stored) {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(DEFAULT_SETTINGS));
+        return DEFAULT_SETTINGS;
+      }
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+    } catch {
+      return DEFAULT_SETTINGS;
+    }
+  },
+
+  saveSettings(settings: CompanySettings): void {
+    try {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    } catch (e) {
+      console.error('Failed to save settings', e);
+    }
   }
 };

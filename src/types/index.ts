@@ -4,6 +4,7 @@ export interface Product {
   category: string;
   activeIngredient: string;
   description: string;
+  usage?: string;
   imageUrl?: string;
   badge?: string;
   isActive: boolean;
@@ -22,6 +23,7 @@ export interface CompanySettings {
   tagline: string;
   phone: string;
   whatsapp: string;
+  facebook: string;
   email: string;
   address: string;
 }

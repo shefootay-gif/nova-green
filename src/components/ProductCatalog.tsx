@@ -1,15 +1,17 @@
 import { useState, useMemo, type FC } from 'react';
-import { Search, Filter, MessageCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { Search, Filter, MessageCircle, AlertCircle, Sparkles, Info } from 'lucide-react';
 import type { Product } from '../types';
 
 interface ProductCatalogProps {
   products: Product[];
   whatsappNumber?: string;
+  onSelectProduct?: (product: Product) => void;
 }
 
 export const ProductCatalog: FC<ProductCatalogProps> = ({
   products,
-  whatsappNumber = '201131603110',
+  whatsappNumber = '011 31603110',
+  onSelectProduct,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -59,10 +61,13 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
   };
 
   const createWhatsAppLink = (product: Product) => {
+    const raw = whatsappNumber.replace(/[^0-9]/g, '');
+    const cleanNum = raw.startsWith('0') ? '2' + raw : raw;
+
     const text = encodeURIComponent(
       `السلام عليكم، أود طلب منتج (${product.name}) - التصنيف: ${product.category} - المادة الفعالة: ${product.activeIngredient} من شركة نوفا جرين`
     );
-    return `https://wa.me/${whatsappNumber}?text=${text}`;
+    return `https://wa.me/${cleanNum}?text=${text}`;
   };
 
   return (
@@ -76,7 +81,7 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 mb-2">كتالوج منتجاتنا</h2>
           <p className="text-sm sm:text-base text-gray-500 font-medium max-w-xl mx-auto">
-            منتجات Nova Green للمغذيات وحماية المحاصيل – يتم تحديث البيانات والصور تباعاً
+            منتجات Nova Green للمغذيات وحماية المحاصيل – اضغط على أي منتج لعرض تفاصيله الفنية
           </p>
         </div>
 
@@ -150,9 +155,12 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                 className="bg-white rounded-2xl p-5 border border-gray-100/90 shadow-sm hover:shadow-md transition-all hover:border-[#88C025]/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
               >
                 {/* Right: Badge / Product Thumbnail & Name & Ingredients */}
-                <div className="flex items-start gap-4 flex-1">
+                <div 
+                  onClick={() => onSelectProduct?.(product)}
+                  className="flex items-start gap-4 flex-1 cursor-pointer"
+                >
                   {/* Thumbnail / NG Logo Badge */}
-                  <div className="w-13 h-13 rounded-2xl bg-[#f2f9e8] border border-[#88C025]/30 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs group-hover:scale-105 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-[#f2f9e8] border border-[#88C025]/30 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs group-hover:scale-105 transition-transform">
                     {product.imageUrl ? (
                       <img
                         src={product.imageUrl}
@@ -203,13 +211,22 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                   </div>
                 </div>
 
-                {/* Left: Order Button via WhatsApp */}
-                <div className="w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 flex items-center justify-end">
+                {/* Left: Action Buttons (Details + Order Button via WhatsApp) */}
+                <div className="w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => onSelectProduct?.(product)}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 px-3 py-2.5 rounded-xl border border-gray-200/80 transition-colors cursor-pointer"
+                    title="عرض البطاقة الفنية للمنتج"
+                  >
+                    <Info className="w-3.5 h-3.5 text-gray-400" />
+                    <span>التفاصيل</span>
+                  </button>
+
                   <a
                     href={createWhatsAppLink(product)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-bold text-white bg-[#25D366] hover:bg-[#20ba59] px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs hover:shadow-md transform hover:-translate-y-0.5"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 text-xs font-bold text-white bg-[#25D366] hover:bg-[#20ba59] px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs hover:shadow-md transform hover:-translate-y-0.5"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>اضغط للطلب</span>

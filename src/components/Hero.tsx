@@ -3,9 +3,15 @@ import { ArrowDown, MessageCircle, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface HeroProps {
   onExploreProducts: () => void;
+  whatsappNumber?: string;
 }
 
-export const Hero: FC<HeroProps> = ({ onExploreProducts }) => {
+export const Hero: FC<HeroProps> = ({ 
+  onExploreProducts, 
+  whatsappNumber = '011 31603110' 
+}) => {
+  const rawPhone = whatsappNumber.replace(/[^0-9]/g, '');
+  const cleanPhone = rawPhone.startsWith('0') ? '2' + rawPhone : rawPhone;
   return (
     <section id="hero" className="relative pt-8 pb-12 overflow-hidden">
       {/* Background Subtle Gradient Blobs */}
@@ -50,7 +56,7 @@ export const Hero: FC<HeroProps> = ({ onExploreProducts }) => {
           </button>
 
           <a
-            href="https://wa.me/201131603110?text=السلام%20عليكم%20،%20أود%20طلب%20استشارة%20زراعية%20بخصوص%20محصولي%20من%20نوفا%20جرين"
+            href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent('السلام عليكم ، أود طلب استشارة زراعية بخصوص محصولي من نوفا جرين')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white hover:bg-gray-50 text-[#13331c] font-bold text-base border-2 border-[#88C025]/40 hover:border-[#88C025] transition-all cursor-pointer shadow-xs"
