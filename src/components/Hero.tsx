@@ -1,18 +1,40 @@
 import type { FC } from 'react';
 import { ArrowDown, MessageCircle, Sparkles, Sprout, Award, Truck, CheckCircle2 } from 'lucide-react';
 import { Animated3DLogo } from './Animated3DLogo';
+import type { HeroContent, TrustRibbonContent } from '../types';
 
 interface HeroProps {
   onExploreProducts: () => void;
   whatsappNumber?: string;
+  hero?: HeroContent;
+  trustRibbon?: TrustRibbonContent;
 }
 
 export const Hero: FC<HeroProps> = ({ 
   onExploreProducts, 
-  whatsappNumber = '011 31603110' 
+  whatsappNumber = '011 31603110',
+  hero,
+  trustRibbon,
 }) => {
   const rawPhone = whatsappNumber.replace(/[^0-9]/g, '');
   const cleanPhone = rawPhone.startsWith('0') ? '2' + rawPhone : rawPhone;
+
+  // Defaults fallback
+  const topBadge = hero?.topBadge || 'حلول زراعية متطورة • جودة موثوقة • إنتاجية أعلى';
+  const titleLine1 = hero?.titleLine1 || 'نزرع النجاح';
+  const titleLine2 = hero?.titleLine2 || 'مع كل مزارع مصري';
+  const subtitle = hero?.subtitle || 'شركة نوفا جرين (Nova Green) متخصصة في تقديم أحدث مركبات التغذية النباتية، المخصبات الحيوية، والمبيدات الوقائية والعلاجية لضمان أعلى إنتاجية وأفضل جودة تسويقية لمحصولك.';
+  const checklist1 = hero?.checklist1 || 'مركبات أصلية معتمدة ومسجلة';
+  const checklist2 = hero?.checklist2 || 'دعم واستشارات فنية مجانية';
+  const checklist3 = hero?.checklist3 || 'أسعار تنافسية وعروض حصرية';
+  const checklist4 = hero?.checklist4 || 'شحن وتوريد سريع لكافة المحافظات';
+  const primaryBtnText = hero?.primaryBtnText || 'استكشف كتالوج المنتجات (17 منتج)';
+  const secondaryBtnText = hero?.secondaryBtnText || 'استشارة زراعية فورية (واتساب)';
+
+  const ribbon1 = trustRibbon?.item1 || { title: 'مستلزمات متكاملة', subtitle: 'أسمدة، مبيدات، ومخصبات' };
+  const ribbon2 = trustRibbon?.item2 || { title: 'جودة فائقة', subtitle: 'خامات نقية سريعة المفعول' };
+  const ribbon3 = trustRibbon?.item3 || { title: 'دعم واستشارات', subtitle: 'فريق فني متخصص بالواتساب' };
+  const ribbon4 = trustRibbon?.item4 || { title: 'توريد سريع', subtitle: 'شحن لكافة المحافظات' };
 
   return (
     <section id="hero" className="relative pt-8 sm:pt-12 pb-16 overflow-hidden bg-gradient-to-b from-[#f4f9f1] via-[#fbfdfa] to-white border-b border-gray-100">
@@ -41,39 +63,39 @@ export const Hero: FC<HeroProps> = ({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#88C025] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#88C025]"></span>
               </span>
-              <span>حلول زراعية متطورة • جودة موثوقة • إنتاجية أعلى</span>
+              <span>{topBadge}</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.18] tracking-tight">
-              نزرع النجاح <br />
+              {titleLine1} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#22A3E2] via-[#5db930] to-[#88C025]">
-                مع كل مزارع مصري
+                {titleLine2}
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-base sm:text-lg text-gray-600 font-medium leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              شركة <strong>نوفا جرين (Nova Green)</strong> متخصصة في تقديم أحدث مركبات التغذية النباتية، المخصبات الحيوية، والمبيدات الوقائية والعلاجية لضمان أعلى إنتاجية وأفضل جودة تسويقية لمحصولك.
+              {subtitle}
             </p>
 
             {/* Highlights Checklist */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs sm:text-sm font-bold text-gray-700 max-w-xl mx-auto lg:mx-0">
               <div className="flex items-center gap-2 bg-white/90 backdrop-blur-xs p-3 rounded-2xl border border-gray-100 shadow-2xs hover:border-[#88C025]/40 transition-colors">
                 <CheckCircle2 className="w-4 h-4 text-[#88C025] shrink-0" />
-                <span>مركبات أصلية معتمدة ومسجلة</span>
+                <span>{checklist1}</span>
               </div>
               <div className="flex items-center gap-2 bg-white/90 backdrop-blur-xs p-3 rounded-2xl border border-gray-100 shadow-2xs hover:border-[#22A3E2]/40 transition-colors">
                 <CheckCircle2 className="w-4 h-4 text-[#22A3E2] shrink-0" />
-                <span>دعم واستشارات فنية مجانية</span>
+                <span>{checklist2}</span>
               </div>
               <div className="flex items-center gap-2 bg-white/90 backdrop-blur-xs p-3 rounded-2xl border border-gray-100 shadow-2xs hover:border-[#88C025]/40 transition-colors">
                 <CheckCircle2 className="w-4 h-4 text-[#88C025] shrink-0" />
-                <span>أسعار تنافسية وعروض حصرية</span>
+                <span>{checklist3}</span>
               </div>
               <div className="flex items-center gap-2 bg-white/90 backdrop-blur-xs p-3 rounded-2xl border border-gray-100 shadow-2xs hover:border-[#22A3E2]/40 transition-colors">
                 <CheckCircle2 className="w-4 h-4 text-[#22A3E2] shrink-0" />
-                <span>شحن وتوريد سريع لكافة المحافظات</span>
+                <span>{checklist4}</span>
               </div>
             </div>
 
@@ -84,7 +106,7 @@ export const Hero: FC<HeroProps> = ({
                 className="w-full sm:w-auto relative group overflow-hidden inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#88C025] to-[#70a518] hover:from-[#76ab1c] hover:to-[#5e8f13] text-white font-black text-base shadow-lg shadow-[#88C025]/30 hover:shadow-xl transition-all transform hover:-translate-y-1 cursor-pointer"
               >
                 <div className="absolute inset-0 w-1/2 h-full bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000"></div>
-                <span>استكشف كتالوج المنتجات (17 منتج)</span>
+                <span>{primaryBtnText}</span>
                 <ArrowDown className="w-4 h-4 animate-bounce" />
               </button>
 
@@ -95,14 +117,19 @@ export const Hero: FC<HeroProps> = ({
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl bg-white hover:bg-[#f9fbf8] text-[#13331c] font-black text-base border-2 border-[#22A3E2]/50 hover:border-[#22A3E2] shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1 cursor-pointer group"
               >
                 <MessageCircle className="w-5 h-5 text-[#22A3E2] group-hover:scale-110 transition-transform" />
-                <span>استشارة زراعية فورية (واتساب)</span>
+                <span>{secondaryBtnText}</span>
               </a>
             </div>
           </div>
 
           {/* Left Column: 3D Interactive Animated Logo */}
           <div className="lg:col-span-5 flex justify-center">
-            <Animated3DLogo />
+            <Animated3DLogo 
+              stat1Number={hero?.stat1Number}
+              stat1Label={hero?.stat1Label}
+              stat2Number={hero?.stat2Number}
+              stat2Label={hero?.stat2Label}
+            />
           </div>
         </div>
 
@@ -113,8 +140,8 @@ export const Hero: FC<HeroProps> = ({
               <Sprout className="w-6 h-6" />
             </div>
             <div>
-              <span className="block text-sm font-black text-gray-900">مستلزمات متكاملة</span>
-              <span className="text-xs text-gray-500 font-medium">أسمدة، مبيدات، ومخصبات</span>
+              <span className="block text-sm font-black text-gray-900">{ribbon1.title}</span>
+              <span className="text-xs text-gray-500 font-medium">{ribbon1.subtitle}</span>
             </div>
           </div>
 
@@ -123,8 +150,8 @@ export const Hero: FC<HeroProps> = ({
               <Award className="w-6 h-6" />
             </div>
             <div>
-              <span className="block text-sm font-black text-gray-900">جودة فائقة</span>
-              <span className="text-xs text-gray-500 font-medium">خامات نقية سريعة المفعول</span>
+              <span className="block text-sm font-black text-gray-900">{ribbon2.title}</span>
+              <span className="text-xs text-gray-500 font-medium">{ribbon2.subtitle}</span>
             </div>
           </div>
 
@@ -133,8 +160,8 @@ export const Hero: FC<HeroProps> = ({
               <MessageCircle className="w-6 h-6" />
             </div>
             <div>
-              <span className="block text-sm font-black text-gray-900">دعم واستشارات</span>
-              <span className="text-xs text-gray-500 font-medium">فريق فني متخصص بالواتساب</span>
+              <span className="block text-sm font-black text-gray-900">{ribbon3.title}</span>
+              <span className="text-xs text-gray-500 font-medium">{ribbon3.subtitle}</span>
             </div>
           </div>
 
@@ -143,8 +170,8 @@ export const Hero: FC<HeroProps> = ({
               <Truck className="w-6 h-6" />
             </div>
             <div>
-              <span className="block text-sm font-black text-gray-900">توريد سريع</span>
-              <span className="text-xs text-gray-500 font-medium">شحن لكافة المحافظات</span>
+              <span className="block text-sm font-black text-gray-900">{ribbon4.title}</span>
+              <span className="text-xs text-gray-500 font-medium">{ribbon4.subtitle}</span>
             </div>
           </div>
         </div>

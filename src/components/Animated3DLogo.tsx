@@ -4,9 +4,19 @@ import { Sparkles, ShieldCheck, Sprout } from 'lucide-react';
 
 interface Animated3DLogoProps {
   className?: string;
+  stat1Number?: string;
+  stat1Label?: string;
+  stat2Number?: string;
+  stat2Label?: string;
 }
 
-export const Animated3DLogo: FC<Animated3DLogoProps> = ({ className = '' }) => {
+export const Animated3DLogo: FC<Animated3DLogoProps> = ({ 
+  className = '',
+  stat1Number = '17+',
+  stat1Label = 'مركب زراعي متخصص',
+  stat2Number = '100%',
+  stat2Label = 'جودة وفاعلية موثوقة',
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
@@ -110,13 +120,13 @@ export const Animated3DLogo: FC<Animated3DLogoProps> = ({ className = '' }) => {
             style={{ transform: 'translateZ(25px)' }}
           >
             <div className="bg-gradient-to-br from-[#f2f9e8] to-[#e7f5d6] p-3 rounded-2xl border border-[#88C025]/30 shadow-2xs group hover:border-[#88C025] transition-all">
-              <span className="block text-2xl font-black text-[#88C025] tracking-tight">17+</span>
-              <span className="text-[11px] text-gray-700 font-bold">مركب زراعي متخصص</span>
+              <span className="block text-2xl font-black text-[#88C025] tracking-tight">{stat1Number}</span>
+              <span className="text-[11px] text-gray-700 font-bold">{stat1Label}</span>
             </div>
             
             <div className="bg-gradient-to-br from-[#eaf6fc] to-[#d8eef9] p-3 rounded-2xl border border-[#22A3E2]/30 shadow-2xs group hover:border-[#22A3E2] transition-all">
-              <span className="block text-2xl font-black text-[#22A3E2] tracking-tight">100%</span>
-              <span className="text-[11px] text-gray-700 font-bold">جودة وفاعلية موثوقة</span>
+              <span className="block text-2xl font-black text-[#22A3E2] tracking-tight">{stat2Number}</span>
+              <span className="text-[11px] text-gray-700 font-bold">{stat2Label}</span>
             </div>
           </div>
 

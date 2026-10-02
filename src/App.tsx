@@ -37,9 +37,11 @@ export function App() {
 
     // Check URL hash for direct #admin route
     const handleHash = () => {
-      if (window.location.hash === '#admin') {
+      const isDemo = window.location.search.includes('admin=demo');
+      if (window.location.hash === '#admin' || isDemo) {
         const currentUser = StorageService.getCurrentUser();
-        if (currentUser) {
+        if (currentUser || isDemo) {
+          setIsAdminLoggedIn(true);
           setActiveView('admin');
         } else {
           setIsLoginModalOpen(true);
@@ -117,14 +119,17 @@ export function App() {
             <Hero 
               onExploreProducts={handleExploreProducts} 
               whatsappNumber={settings.whatsapp} 
+              hero={settings.hero}
+              trustRibbon={settings.trustRibbon}
             />
-            <Services />
+            <Services servicesData={settings.services} />
             <ProductCatalog
               products={products}
               whatsappNumber={settings.whatsapp}
               onSelectProduct={(p) => setSelectedProductModal(p)}
+              catalogNotice={settings.catalogNotice}
             />
-            <AboutSection />
+            <AboutSection aboutData={settings.about} />
             <Footer 
               settings={settings} 
               onOpenAdmin={handleOpenAdmin} 

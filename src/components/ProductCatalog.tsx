@@ -1,17 +1,19 @@
 import { useState, useMemo, type FC } from 'react';
 import { Search, Filter, MessageCircle, Sparkles, Info, Tag, CheckCircle2 } from 'lucide-react';
-import type { Product } from '../types';
+import type { Product, CatalogNoticeContent } from '../types';
 
 interface ProductCatalogProps {
   products: Product[];
   whatsappNumber?: string;
   onSelectProduct?: (product: Product) => void;
+  catalogNotice?: CatalogNoticeContent;
 }
 
 export const ProductCatalog: FC<ProductCatalogProps> = ({
   products,
   whatsappNumber = '011 31603110',
   onSelectProduct,
+  catalogNotice,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -363,8 +365,8 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div className="flex-1 text-center sm:text-right">
-            <strong className="text-gray-900 block mb-0.5">ضمان الجودة والتسجيل الرسمي:</strong>
-            كافة المنتجات والمركبات مختارة وفق أعلى معايير الجودة ومطابقة للتوصيات الفنية المعتمدة لوزارة الزراعة المصرية لتحقيق أعلى إنتاجية لمحصولك.
+            <strong className="text-gray-900 block mb-0.5">{catalogNotice?.title || 'ضمان الجودة والتسجيل الرسمي:'}</strong>
+            {catalogNotice?.text || 'كافة المنتجات والمركبات مختارة وفق أعلى معايير الجودة ومطابقة للتوصيات الفنية المعتمدة لوزارة الزراعة المصرية لتحقيق أعلى إنتاجية لمحصولك.'}
           </div>
         </div>
       </div>

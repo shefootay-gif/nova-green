@@ -1,37 +1,67 @@
 import type { FC } from 'react';
 import { Sprout, ShieldCheck, HeartHandshake, CheckCircle2 } from 'lucide-react';
+import type { ServicesContent } from '../types';
 
-export const Services: FC = () => {
-  const services = [
+interface ServicesProps {
+  servicesData?: ServicesContent;
+}
+
+export const Services: FC<ServicesProps> = ({ servicesData }) => {
+  const badge = servicesData?.badge || 'خدمات وحلول Nova Green';
+  const title = servicesData?.title || 'ماذا نقدم لقطاع الزراعة؟';
+  const subtitle = servicesData?.subtitle || 'حلول متكاملة تغطي كافة مراحل نمو النبات، من إعداد التربة والشتل وحتى الحصاد بأعلى جودة تسويقية.';
+
+  const card1 = servicesData?.card1 || {
+    title: 'مستلزمات وتغذية زراعية',
+    tag: 'تغذية ومخصبات',
+    description: 'مجموعة متكاملة من الأسمدة المركبة، العناصر الصغرى المخلبية، والمخصبات الحيوية لتنشيط الجذور وتحفيز النمو الخضري والثمري.',
+    point1: 'عناصر صغرى مخلبية سريعة الامتصاص',
+    point2: 'هيوميك وفولفيك نقي عالي التركيز',
+    point3: 'كالسيوم وبورون سريع النفاذ لمنع التشوهات',
+  };
+
+  const card2 = servicesData?.card2 || {
+    title: 'حلول حماية المحاصيل',
+    tag: 'وقاية ومكافحة',
+    description: 'أقوى المبيدات المتخصصة لمكافحة الآفات الحشرية، الأكاروسات، الفطريات، وأعفان الجذور وفق برامج المكافحة المتكاملة والمعتمدة.',
+    point1: 'مبيدات جهازية واسعة المدى وآمنة',
+    point2: 'مكافحة حاسمة للنيماتودا وحماية الجذور',
+    point3: 'علاج متخصص للأعفان والتبقعات واللفحات',
+  };
+
+  const card3 = servicesData?.card3 || {
+    title: 'دعم فني واستشارات للمزارع',
+    tag: 'إرشاد زراعي',
+    description: 'مهندسون استشاريون لمتابعة محصولك خطوة بخطوة، وتقديم برامج تسميد ومكافحة دقيقة تناسب طبيعة التربة والطقس واحتياج النبات.',
+    point1: 'تحديد الجرعات والمواعيد بدقة متناهية',
+    point2: 'تشخيص فوري للآفات والإصابات عبر الواتساب',
+    point3: 'متابعة دورية للمحصول حتى الحصاد',
+  };
+
+  const items = [
     {
-      title: 'مستلزمات وتغذية زراعية',
-      description: 'مجموعة متكاملة من الأسمدة المركبة، العناصر الصغرى المخلبية، والمخصبات الحيوية لتنشيط الجذور وتحفيز النمو الخضري والثمري.',
+      ...card1,
       icon: Sprout,
       color: 'text-[#88C025]',
       bg: 'bg-[#f2f9e8]',
       borderColor: 'border-[#88C025]/30',
-      tag: 'تغذية ومخصبات',
-      features: ['عناصر صغرى مخلبية', 'هيوميك وفولفيك نقي', 'كالسيوم وبورون سريع النفاذ'],
+      features: [card1.point1, card1.point2, card1.point3],
     },
     {
-      title: 'حلول حماية المحاصيل',
-      description: 'أقوى المبيدات المتخصصة لمكافحة الآفات الحشرية، الأكاروسات، الفطريات، وأعفان الجذور وفق برامج المكافحة المتكاملة والمعتمدة.',
+      ...card2,
       icon: ShieldCheck,
       color: 'text-[#22A3E2]',
       bg: 'bg-[#eaf6fc]',
       borderColor: 'border-[#22A3E2]/30',
-      tag: 'وقاية ومكافحة',
-      features: ['مبيدات جهازية واسعة المدى', 'مكافحة حاسمة للنيماتودا', 'علاج متخصص لأعفان الجذور'],
+      features: [card2.point1, card2.point2, card2.point3],
     },
     {
-      title: 'دعم فني واستشارات للمزارع',
-      description: 'مهندسون استشاريون لمتابعة محصولك خطوة بخطوة، وتقديم برامج تسميد ومكافحة دقيقة تناسب طبيعة التربة والطقس واحتياج النبات.',
+      ...card3,
       icon: HeartHandshake,
       color: 'text-amber-600',
       bg: 'bg-amber-50',
       borderColor: 'border-amber-200',
-      tag: 'إرشاد زراعي',
-      features: ['تحديد الجرعات والمواعيد بدقة', 'تشخيص فوري للآفات بالواتساب', 'متابعة دورية للمحصول'],
+      features: [card3.point1, card3.point2, card3.point3],
     },
   ];
 
@@ -41,19 +71,19 @@ export const Services: FC = () => {
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-14">
           <span className="text-xs font-black text-[#22A3E2] bg-[#eaf6fc] px-4 py-1.5 rounded-full border border-[#22A3E2]/30 mb-3 inline-block">
-            خدمات وحلول Nova Green
+            {badge}
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-3">
-            ماذا نقدم <span className="text-[#88C025]">لقطاع الزراعة؟</span>
+            {title}
           </h2>
           <p className="text-sm sm:text-base text-gray-500 font-medium leading-relaxed">
-            حلول متكاملة تغطي كافة مراحل نمو النبات، من إعداد التربة والشتل وحتى الحصاد بأعلى جودة تسويقية.
+            {subtitle}
           </p>
         </div>
 
         {/* 3 Modern Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {services.map((item, idx) => {
+          {items.map((item, idx) => {
             const Icon = item.icon;
             return (
               <div
