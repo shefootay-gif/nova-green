@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { ChangeEvent, FormEvent, FC } from 'react';
 import {
   Plus,
@@ -16,6 +16,8 @@ import {
   Layers,
   Sparkles,
   Eye,
+  EyeOff,
+  Percent,
   Phone,
   Download,
   UploadCloud,
@@ -26,6 +28,7 @@ import {
   AlertTriangle,
   Info,
   Sliders,
+  RefreshCw,
 } from 'lucide-react';
 import type { Product, CompanySettings } from '../types';
 import { StorageService } from '../services/storage';
@@ -76,6 +79,41 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
 
   // --- Dynamic CMS Settings State (Cloned for live editing) ---
   const [cmsSettings, setCmsSettings] = useState<CompanySettings>(settings);
+  const [syncStatus, setSyncStatus] = useState<'saved' | 'saving'>('saved');
+  const isInitialMount = useRef(true);
+  const lastSavedSettingsRef = useRef<string>(JSON.stringify(settings));
+
+  // Keep cmsSettings in sync if external settings change (e.g. from another tab or reset)
+  useEffect(() => {
+    const incomingStr = JSON.stringify(settings);
+    if (incomingStr !== lastSavedSettingsRef.current) {
+      lastSavedSettingsRef.current = incomingStr;
+      setCmsSettings(settings);
+    }
+  }, [settings]);
+
+  // Automatic live synchronization debounced effect for ANY user edit/action in cmsSettings
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const currentStr = JSON.stringify(cmsSettings);
+    if (currentStr === lastSavedSettingsRef.current) {
+      return;
+    }
+
+    setSyncStatus('saving');
+    const timer = setTimeout(() => {
+      StorageService.saveSettings(cmsSettings);
+      lastSavedSettingsRef.current = JSON.stringify(cmsSettings);
+      onRefreshSettings();
+      setSyncStatus('saved');
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [cmsSettings, onRefreshSettings]);
 
   // --- Security / Password State ---
   const [oldPassword, setOldPassword] = useState('');
@@ -186,6 +224,32 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
       return;
     }
 
+    // Determine image: if provided use it, otherwise automatically assign the matching 3D packaging render based on category
+    let finalImageUrl = formImageUrl.trim();
+    if (!finalImageUrl) {
+      if (
+        finalCategory.includes('حشر') ||
+        finalCategory.includes('فطر') ||
+        finalCategory.includes('عناك') ||
+        finalCategory.includes('مبيد') ||
+        finalCategory.includes('نيماتودا') ||
+        finalCategory.includes('أكاروس')
+      ) {
+        finalImageUrl = '/products/pesticide.jpg';
+      } else if (finalCategory.includes('طحالب') || finalCategory.includes('أحماض')) {
+        finalImageUrl = '/products/algae.jpg';
+      } else if (
+        finalCategory.includes('هيوميك') ||
+        finalCategory.includes('فولفيك') ||
+        finalCategory.includes('تربة') ||
+        finalCategory.includes('ملوحة')
+      ) {
+        finalImageUrl = '/products/humic.jpg';
+      } else {
+        finalImageUrl = '/products/fertilizer.jpg';
+      }
+    }
+
     if (editingProduct) {
       StorageService.updateProduct({
         ...editingProduct,
@@ -197,7 +261,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
         price: formPrice ? Number(formPrice) : undefined,
         oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
         unit: formUnit.trim() || undefined,
-        imageUrl: formImageUrl,
+        imageUrl: finalImageUrl,
         badge: formBadge.trim() || undefined,
         isActive: formIsActive,
       });
@@ -212,11 +276,11 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
         price: formPrice ? Number(formPrice) : undefined,
         oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
         unit: formUnit.trim() || undefined,
-        imageUrl: formImageUrl,
+        imageUrl: finalImageUrl,
         badge: formBadge.trim() || finalCategory,
         isActive: formIsActive,
       });
-      showToast('تمت إضافة المنتج الجديد بنجاح');
+      showToast('تمت إضافة المنتج الجديد بنجاح - يظهر الآن في مقدمة كتالوج الموقع!');
     }
 
     onRefreshProducts();
@@ -255,8 +319,10 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
   const handleSaveAllSettings = (e?: FormEvent) => {
     if (e) e.preventDefault();
     StorageService.saveSettings(cmsSettings);
+    lastSavedSettingsRef.current = JSON.stringify(cmsSettings);
     onRefreshSettings();
-    showToast('تم حفظ كافة التعديلات والإعدادات بنجاح! الموقع محدث الآن.');
+    setSyncStatus('saved');
+    showToast('تم حفظ ومزامنة كافة التعديلات بنجاح! الموقع محدث الآن.');
   };
 
   // --- Password Change Handler ---
@@ -269,8 +335,8 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordMsg({ type: 'error', text: 'كلمة المرور الجديدة يجب ألا تقل عن 6 أحرف أو أرقام' });
+    if (newPassword.length < 8) {
+      setPasswordMsg({ type: 'error', text: 'كلمة المرور الجديدة يجب ألا تقل عن 8 أحرف أو أرقام' });
       return;
     }
 
@@ -371,8 +437,23 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
               </div>
             </div>
 
-            {/* Quick Actions */}
+            {/* Quick Actions & Live Sync Indicator */}
             <div className="flex items-center gap-2.5">
+              {/* Live Sync Badge */}
+              <div className="hidden sm:inline-flex items-center">
+                {syncStatus === 'saving' ? (
+                  <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-amber-200/80 animate-pulse">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                    <span>مزامنة تلقائية...</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-200/80">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>متزامن تلقائياً</span>
+                  </span>
+                )}
+              </div>
+
               <button
                 onClick={onNavigateHome}
                 className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer"
@@ -527,6 +608,101 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                   <CheckCircle className="w-6 h-6" />
+                </div>
+              </div>
+            </div>
+
+            {/* Price & Offers Display Visibility Controls */}
+            <div className="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-2xs">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <div>
+                  <h3 className="text-sm font-black text-gray-900 flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-[#88C025]" />
+                    <span>خيارات عرض الأسعار ونسب العروض بالموقع</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 font-medium mt-1">
+                    تحكم فوري وسريع في إظهار أو إخفاء مبالغ الأسعار وشارات الخصومات لكافة زوار متجر نوفا جرين
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {/* Toggle 1: Show/Hide Prices */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = { ...cmsSettings, showPrices: !cmsSettings.showPrices };
+                      setCmsSettings(updated);
+                      StorageService.saveSettings(updated);
+                      onRefreshSettings();
+                      showToast(updated.showPrices ? 'تم تفعيل إظهار الأسعار لكافة الزوار' : 'تم إخفاء الأسعار (السعر عند الطلب)');
+                    }}
+                    className={`flex items-center justify-between gap-4 px-4 py-3 rounded-xl border transition-all cursor-pointer select-none text-right ${
+                      cmsSettings.showPrices !== false
+                        ? 'bg-[#f4f9ed] border-[#88C025]/50 text-gray-900 shadow-2xs'
+                        : 'bg-gray-50 border-gray-200 text-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        cmsSettings.showPrices !== false ? 'bg-[#88C025] text-white' : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        {cmsSettings.showPrices !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                      </div>
+                      <div>
+                        <div className="text-xs font-black">
+                          {cmsSettings.showPrices !== false ? 'إظهار الأسعار: مُفعّل' : 'إظهار الأسعار: مُعطّل'}
+                        </div>
+                        <div className="text-[10px] text-gray-500 font-medium">
+                          {cmsSettings.showPrices !== false ? 'يتم عرض السعر بالجنيه' : 'يظهر "تواصل لعرض السعر"'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={`w-11 h-6 rounded-full p-1 transition-colors flex items-center ${
+                      cmsSettings.showPrices !== false ? 'bg-[#88C025] justify-start' : 'bg-gray-300 justify-end'
+                    }`}>
+                      <div className="w-4 h-4 rounded-full bg-white shadow-xs" />
+                    </div>
+                  </button>
+
+                  {/* Toggle 2: Show/Hide Discounts */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = { ...cmsSettings, showDiscounts: !cmsSettings.showDiscounts };
+                      setCmsSettings(updated);
+                      StorageService.saveSettings(updated);
+                      onRefreshSettings();
+                      showToast(updated.showDiscounts ? 'تم تفعيل إظهار شارات الخصومات والعروض' : 'تم إخفاء شارات ونسب العروض');
+                    }}
+                    className={`flex items-center justify-between gap-4 px-4 py-3 rounded-xl border transition-all cursor-pointer select-none text-right ${
+                      cmsSettings.showDiscounts !== false
+                        ? 'bg-[#eef8fd] border-[#22A3E2]/50 text-gray-900 shadow-2xs'
+                        : 'bg-gray-50 border-gray-200 text-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        cmsSettings.showDiscounts !== false ? 'bg-[#22A3E2] text-white' : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        <Percent className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black">
+                          {cmsSettings.showDiscounts !== false ? 'شارات العروض: مُفعّلة' : 'شارات العروض: مُعطّلة'}
+                        </div>
+                        <div className="text-[10px] text-gray-500 font-medium">
+                          {cmsSettings.showDiscounts !== false ? 'ظهور بادجات الخصم % والشطب' : 'إخفاء شارات ونسب التخفيض'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={`w-11 h-6 rounded-full p-1 transition-colors flex items-center ${
+                      cmsSettings.showDiscounts !== false ? 'bg-[#22A3E2] justify-start' : 'bg-gray-300 justify-end'
+                    }`}>
+                      <div className="w-4 h-4 rounded-full bg-white shadow-xs" />
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -2186,7 +2362,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                       className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer"
                     >
                       <Upload className="w-3.5 h-3.5" />
-                      <span>{formImageUrl ? 'تغيير الصورة' : 'رفع صورة من الجهاز'}</span>
+                      <span>{formImageUrl ? 'تغيير الصورة من الجهاز' : 'رفع صورة من الجهاز'}</span>
                     </button>
 
                     {formImageUrl && (
@@ -2198,6 +2374,66 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                         إزالة الصورة
                       </button>
                     )}
+                  </div>
+                </div>
+
+                {/* 3D Bottle Packaging Presets */}
+                <div className="pt-2.5">
+                  <span className="block text-[11px] font-bold text-gray-500 mb-1.5">
+                    أو اختر قالباً ثلاثي الأبعاد جاهزاً مطابقاً للعبوات الزراعية:
+                  </span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormImageUrl('/products/fertilizer.jpg')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xl border text-right transition-all cursor-pointer ${
+                        formImageUrl === '/products/fertilizer.jpg'
+                          ? 'bg-[#f4f9ed] border-[#88C025] ring-2 ring-[#88C025]/30'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <img src="/products/fertilizer.jpg" alt="أسمدة" className="w-8 h-8 object-contain shrink-0" />
+                      <span className="text-[10px] font-bold text-gray-700">أسمدة ومخصبات</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormImageUrl('/products/algae.jpg')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xl border text-right transition-all cursor-pointer ${
+                        formImageUrl === '/products/algae.jpg'
+                          ? 'bg-[#eef8fd] border-[#22A3E2] ring-2 ring-[#22A3E2]/30'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <img src="/products/algae.jpg" alt="طحالب" className="w-8 h-8 object-contain shrink-0" />
+                      <span className="text-[10px] font-bold text-gray-700">طحالب وأحماض</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormImageUrl('/products/humic.jpg')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xl border text-right transition-all cursor-pointer ${
+                        formImageUrl === '/products/humic.jpg'
+                          ? 'bg-amber-50 border-amber-500 ring-2 ring-amber-500/30'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <img src="/products/humic.jpg" alt="هيوميك" className="w-8 h-8 object-contain shrink-0" />
+                      <span className="text-[10px] font-bold text-gray-700">هيوميك وفولفيك</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormImageUrl('/products/pesticide.jpg')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xl border text-right transition-all cursor-pointer ${
+                        formImageUrl === '/products/pesticide.jpg'
+                          ? 'bg-red-50 border-red-500 ring-2 ring-red-500/30'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <img src="/products/pesticide.jpg" alt="مبيد" className="w-8 h-8 object-contain shrink-0" />
+                      <span className="text-[10px] font-bold text-gray-700">مبيدات ووقاية</span>
+                    </button>
                   </div>
                 </div>
               </div>

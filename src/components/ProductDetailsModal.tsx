@@ -68,15 +68,21 @@ export const ProductDetailsModal: FC<ProductDetailsModalProps> = ({
             <div className="text-center sm:text-right flex-1">
               <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
                 <h2 className="text-2xl font-black text-gray-900">{product.name}</h2>
-                {product.price && (
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-[#13331c]">
-                      {product.price} <span className="text-sm text-[#88C025]">ج.م</span>
-                    </span>
-                    {product.oldPrice && (
-                      <del className="text-xs text-gray-400 font-bold">{product.oldPrice} ج.م</del>
-                    )}
-                  </div>
+                {settings.showPrices !== false ? (
+                  product.price ? (
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-black text-[#13331c]">
+                        {product.price} <span className="text-sm text-[#88C025]">ج.م</span>
+                      </span>
+                      {settings.showDiscounts !== false && product.oldPrice && (
+                        <del className="text-xs text-gray-400 font-bold">{product.oldPrice} ج.م</del>
+                      )}
+                    </div>
+                  ) : null
+                ) : (
+                  <span className="inline-block text-xs font-bold text-[#22A3E2] bg-[#eaf6fc] px-3 py-1 rounded-lg border border-[#22A3E2]/30">
+                    السعر عند الطلب
+                  </span>
                 )}
               </div>
 

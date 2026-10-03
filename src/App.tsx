@@ -10,7 +10,7 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { ProductDetailsModal } from './components/ProductDetailsModal';
 import type { Product, CompanySettings } from './types';
-import { StorageService, DEFAULT_SETTINGS } from './services/storage';
+import { StorageService, DEFAULT_SETTINGS, PRODUCTS_STORAGE_KEY, SETTINGS_STORAGE_KEY } from './services/storage';
 
 export function App() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,13 +37,14 @@ export function App() {
 
     // Check URL hash for direct #admin route
     const handleHash = () => {
-      const isDemo = window.location.search.includes('admin=demo');
-      if (window.location.hash === '#admin' || isDemo) {
+      if (window.location.hash === '#admin') {
         const currentUser = StorageService.getCurrentUser();
-        if (currentUser || isDemo) {
+        if (currentUser) {
           setIsAdminLoggedIn(true);
           setActiveView('admin');
         } else {
+          // Clear the hash and show login modal
+          window.location.hash = '';
           setIsLoginModalOpen(true);
         }
       } else {
@@ -53,7 +54,32 @@ export function App() {
 
     handleHash();
     window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+
+    // Synchronize products and settings automatically across tabs/windows via BroadcastChannel & StorageEvent
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === PRODUCTS_STORAGE_KEY || !e.key) {
+        setProducts(StorageService.getProducts());
+      }
+      if (e.key === SETTINGS_STORAGE_KEY || !e.key) {
+        setSettings(StorageService.getSettings());
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    const unsubscribeSync = StorageService.onSync((type) => {
+      if (type === 'products' || type === 'all') {
+        setProducts(StorageService.getProducts());
+      }
+      if (type === 'settings' || type === 'all') {
+        setSettings(StorageService.getSettings());
+      }
+    });
+
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('storage', handleStorageChange);
+      unsubscribeSync();
+    };
   }, []);
 
   const handleRefreshProducts = () => {
@@ -128,6 +154,8 @@ export function App() {
               whatsappNumber={settings.whatsapp}
               onSelectProduct={(p) => setSelectedProductModal(p)}
               catalogNotice={settings.catalogNotice}
+              showPrices={settings.showPrices}
+              showDiscounts={settings.showDiscounts}
             />
             <AboutSection aboutData={settings.about} />
             <Footer 

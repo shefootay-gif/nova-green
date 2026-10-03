@@ -7,6 +7,8 @@ interface ProductCatalogProps {
   whatsappNumber?: string;
   onSelectProduct?: (product: Product) => void;
   catalogNotice?: CatalogNoticeContent;
+  showPrices?: boolean;
+  showDiscounts?: boolean;
 }
 
 export const ProductCatalog: FC<ProductCatalogProps> = ({
@@ -14,6 +16,8 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
   whatsappNumber = '011 31603110',
   onSelectProduct,
   catalogNotice,
+  showPrices = true,
+  showDiscounts = true,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -197,7 +201,7 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 [&>*:last-child:nth-child(4n-3)]:xl:col-start-2 [&>*:last-child:nth-child(3n-2)]:lg:col-start-2">
             {filteredProducts.map((product) => {
               const theme = getCategoryTheme(product.category);
               const discount =
@@ -224,7 +228,7 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                         {product.category}
                       </span>
 
-                      {discount && (
+                      {showDiscounts && discount && (
                         <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-red-500 text-white shadow-xs">
                           خصم {discount}%
                         </span>
@@ -307,19 +311,28 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                     <div className="pt-3 border-t border-gray-100 space-y-3">
                       {/* Price Tag */}
                       <div className="flex items-baseline justify-between">
-                        <div>
-                          <span className="text-xs text-gray-400 font-bold block">السعر:</span>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-black text-[#13331c]">
-                              {product.price || 280} <span className="text-sm font-bold text-[#88C025]">ج.م</span>
-                            </span>
-                            {product.oldPrice && (
-                              <del className="text-xs text-gray-400 font-bold">
-                                {product.oldPrice} ج.م
-                              </del>
-                            )}
+                        {showPrices ? (
+                          <div>
+                            <span className="text-xs text-gray-400 font-bold block">السعر:</span>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-2xl font-black text-[#13331c]">
+                                {product.price || 280} <span className="text-sm font-bold text-[#88C025]">ج.م</span>
+                              </span>
+                              {showDiscounts && product.oldPrice && (
+                                <del className="text-xs text-gray-400 font-bold">
+                                  {product.oldPrice} ج.م
+                                </del>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div>
+                            <span className="text-xs text-gray-400 font-bold block">السعر:</span>
+                            <span className="inline-block text-xs font-bold text-[#22A3E2] bg-[#eaf6fc] px-2.5 py-1 rounded-lg border border-[#22A3E2]/30">
+                              تواصل للطلب وعرض السعر
+                            </span>
+                          </div>
+                        )}
 
                         {product.badge && (
                           <span className="text-[10px] font-extrabold text-[#386208] bg-[#f2f9e8] px-2 py-0.5 rounded-md border border-[#88C025]/30">

@@ -94,6 +94,8 @@ export interface CompanySettings {
   email: string;
   address: string;
   workingHours: string;
+  showPrices: boolean;
+  showDiscounts: boolean;
   hero: HeroContent;
   services: ServicesContent;
   trustRibbon: TrustRibbonContent;

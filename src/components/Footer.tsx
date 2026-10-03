@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Phone, Mail, MessageCircle, Shield } from 'lucide-react';
+import { Phone, Mail, MessageCircle, Shield, MapPin, Clock } from 'lucide-react';
 import type { CompanySettings } from '../types';
 
 interface FooterProps {
@@ -14,15 +14,15 @@ export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
   return (
     <footer id="contact" className="bg-[#13331c] text-white pt-16 pb-12 border-t border-emerald-950">
       <div className="max-w-5xl mx-auto px-4 text-center">
-        {/* Title Matching Video */}
+        {/* Title */}
         <h2 className="text-3xl font-extrabold mb-3 text-white">تواصل مع نوفا جرين</h2>
         <p className="text-sm text-emerald-200/80 mb-10 max-w-md mx-auto">
           نسعد دائماً بالتواصل معكم وتقديم الاستشارات الفنية والرد على كافة طلباتكم واستفساراتكم
         </p>
 
-        {/* Contact Quick Buttons Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-          {/* WhatsApp Button */}
+        {/* 4 Contact Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* WhatsApp */}
           <a
             href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent('السلام عليكم ، أود طلب منتجات من شركة نوفا جرين')}`}
             target="_blank"
@@ -34,11 +34,11 @@ export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
             </div>
             <div className="text-right">
               <span className="block text-[11px] text-emerald-300 font-medium">واتساب للطلب السريع</span>
-              <span className="text-sm font-bold text-white dir-ltr text-right">{settings.whatsapp}</span>
+              <span className="text-sm font-bold text-white">{settings.whatsapp}</span>
             </div>
           </a>
 
-          {/* Phone Call */}
+          {/* Phone */}
           <a
             href={`tel:${settings.phone.replace(/[^0-9+]/g, '')}`}
             className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl p-4 transition-all hover:-translate-y-0.5 group"
@@ -48,11 +48,11 @@ export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
             </div>
             <div className="text-right">
               <span className="block text-[11px] text-emerald-300 font-medium">اتصال هاتفي</span>
-              <span className="text-sm font-bold text-white dir-ltr text-right">{settings.phone}</span>
+              <span className="text-sm font-bold text-white">{settings.phone}</span>
             </div>
           </a>
 
-          {/* Facebook Official Page */}
+          {/* Facebook */}
           <a
             href={settings.facebook}
             target="_blank"
@@ -85,12 +85,35 @@ export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
           </a>
         </div>
 
-        {/* Footer Bottom Bar */}
-        <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-200/60">
-          <div className="flex items-center gap-2">
-            <span>جميع الحقوق محفوظة © {new Date().getFullYear()} شركة نوفا جرين (Nova Green)</span>
-          </div>
+        {/* Address & Working Hours */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+          {settings.address && (
+            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-4 text-right">
+              <div className="w-9 h-9 rounded-xl bg-[#88C025]/20 flex items-center justify-center text-[#88C025] shrink-0">
+                <MapPin className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block text-[11px] text-emerald-300 font-medium">العنوان والتغطية</span>
+                <span className="text-xs font-semibold text-white/90">{settings.address}</span>
+              </div>
+            </div>
+          )}
+          {settings.workingHours && (
+            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-4 text-right">
+              <div className="w-9 h-9 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-400 shrink-0">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="block text-[11px] text-emerald-300 font-medium">ساعات العمل</span>
+                <span className="text-xs font-semibold text-white/90">{settings.workingHours}</span>
+              </div>
+            </div>
+          )}
+        </div>
 
+        {/* Bottom Bar */}
+        <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-200/60">
+          <span>جميع الحقوق محفوظة © {new Date().getFullYear()} شركة نوفا جرين (Nova Green)</span>
           <div className="flex items-center gap-4">
             <a
               href={settings.facebook}

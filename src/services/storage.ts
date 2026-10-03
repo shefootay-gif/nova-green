@@ -1,9 +1,29 @@
 import type { Product, SafeUser, CompanySettings } from '../types';
 import { INITIAL_PRODUCTS } from '../data/initialProducts';
 
-const PRODUCTS_STORAGE_KEY = 'nova_green_products_v3';
-const SETTINGS_STORAGE_KEY = 'nova_green_settings_v2';
-const AUTH_TOKEN_KEY = 'nova_green_admin_session';
+export const PRODUCTS_STORAGE_KEY = 'nova_green_products_v3';
+export const SETTINGS_STORAGE_KEY = 'nova_green_settings_v2';
+export const AUTH_TOKEN_KEY = 'nova_green_admin_session';
+
+// Real-time synchronization BroadcastChannel for instant cross-tab sync
+let syncChannel: BroadcastChannel | null = null;
+try {
+  if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+    syncChannel = new BroadcastChannel('nova_green_realtime_sync');
+  }
+} catch {
+  // Graceful fallback for environments without BroadcastChannel
+}
+
+export const notifySync = (type: 'products' | 'settings' | 'all') => {
+  try {
+    if (syncChannel) {
+      syncChannel.postMessage({ type, timestamp: Date.now() });
+    }
+  } catch {
+    // Ignore notification errors
+  }
+};
 
 export const DEFAULT_SETTINGS: CompanySettings = {
   companyName: 'نوفا جرين',
@@ -11,9 +31,11 @@ export const DEFAULT_SETTINGS: CompanySettings = {
   phone: '011 31603110',
   whatsapp: '011 31603110',
   facebook: 'https://www.facebook.com/share/1BurYZKAcy/',
-  email: 'info@novagreen.com',
+  email: 'novagreen110@gmail.com',
   address: 'جمهورية مصر العربية - خدمة المزارعين في كافة المحافظات',
   workingHours: 'يومياً من 9:00 صباحاً حتى 9:00 مساءً (دعم فني واستشارات متواصل)',
+  showPrices: true,
+  showDiscounts: true,
   hero: {
     topBadge: 'حلول زراعية متطورة • جودة موثوقة • إنتاجية أعلى',
     titleLine1: 'نزرع النجاح',
@@ -140,6 +162,7 @@ export const StorageService = {
   saveProducts(products: Product[]): void {
     try {
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+      notifySync('products');
     } catch (e) {
       console.error('Failed to save to localStorage', e);
     }
@@ -178,6 +201,7 @@ export const StorageService = {
   // Reset back to original 17 products
   resetToDefault(): Product[] {
     localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(INITIAL_PRODUCTS));
+    notifySync('products');
     return INITIAL_PRODUCTS;
   },
 
@@ -192,9 +216,12 @@ export const StorageService = {
         username: 'admin',
         role: 'admin',
       };
-      // Store session token
+      // Store session token — crypto.getRandomValues for unpredictable token
+      const randomBytes = new Uint8Array(16);
+      crypto.getRandomValues(randomBytes);
+      const secureToken = 'session_' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
       localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify({
-        token: 'session_' + Math.random().toString(36).substring(2),
+        token: secureToken,
         user: safeUser,
         timestamp: Date.now(),
       }));
@@ -203,12 +230,18 @@ export const StorageService = {
     return null;
   },
 
-  // Get current logged-in user (strictly returns SafeUser without password)
+  // Get current logged-in user — validates session and checks expiry (8 hours)
   getCurrentUser(): SafeUser | null {
     try {
       const session = localStorage.getItem(AUTH_TOKEN_KEY);
       if (!session) return null;
       const parsed = JSON.parse(session);
+      // Auto-expire sessions older than 8 hours
+      const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+      if (!parsed.timestamp || Date.now() - parsed.timestamp > SESSION_TTL_MS) {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        return null;
+      }
       return parsed.user as SafeUser;
     } catch {
       return null;
@@ -220,8 +253,9 @@ export const StorageService = {
     localStorage.removeItem(AUTH_TOKEN_KEY);
   },
 
-  // Change admin password securely
+  // Change admin password securely — enforces minimum 8-char length server-side
   async updatePassword(oldPassword: string, newPassword: string): Promise<boolean> {
+    if (!newPassword || newPassword.length < 8) return false;
     const oldHash = await sha256(oldPassword);
     const currentHash = localStorage.getItem('nova_green_admin_hash') || DEFAULT_PASSWORD_HASH;
 
@@ -243,9 +277,15 @@ export const StorageService = {
         return DEFAULT_SETTINGS;
       }
       const parsed = JSON.parse(stored);
+      if (parsed.email === 'info@novagreen.com' || !parsed.email) {
+        parsed.email = 'novagreen110@gmail.com';
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
+      }
       return {
         ...DEFAULT_SETTINGS,
         ...parsed,
+        showPrices: parsed.showPrices !== undefined ? Boolean(parsed.showPrices) : true,
+        showDiscounts: parsed.showDiscounts !== undefined ? Boolean(parsed.showDiscounts) : true,
         hero: { ...DEFAULT_SETTINGS.hero, ...(parsed.hero || {}) },
         services: {
           ...DEFAULT_SETTINGS.services,
@@ -273,6 +313,7 @@ export const StorageService = {
   saveSettings(settings: CompanySettings): void {
     try {
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+      notifySync('settings');
     } catch (e) {
       console.error('Failed to save settings', e);
     }
@@ -299,6 +340,7 @@ export const StorageService = {
       }
       this.saveProducts(data.products);
       this.saveSettings(data.settings);
+      notifySync('all');
       return { success: true, message: `تم استعادة النسخة الاحتياطية بنجاح (${data.products.length} منتج)` };
     } catch {
       return { success: false, message: 'فشل في قراءة ملف JSON' };
@@ -309,5 +351,20 @@ export const StorageService = {
   resetAllToFactory(): void {
     localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(INITIAL_PRODUCTS));
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(DEFAULT_SETTINGS));
+    notifySync('all');
+  },
+
+  // Subscribe to real-time synchronization events across tabs and windows
+  onSync(callback: (type: 'products' | 'settings' | 'all') => void): () => void {
+    if (!syncChannel) return () => {};
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type) {
+        callback(event.data.type);
+      }
+    };
+    syncChannel.addEventListener('message', handler);
+    return () => {
+      syncChannel?.removeEventListener('message', handler);
+    };
   },
 };

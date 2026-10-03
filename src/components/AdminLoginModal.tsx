@@ -16,11 +16,22 @@ export const AdminLoginModal: FC<AdminLoginModalProps> = ({
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
   if (!isOpen) return null;
 
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+  const remainingSecs = isLocked ? Math.ceil((lockedUntil! - Date.now()) / 1000) : 0;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (isLocked) {
+      setError(`محاولات كثيرة — انتظر ${remainingSecs} ثانية قبل المحاولة مجدداً`);
+      return;
+    }
+
     if (!password.trim()) {
       setError('يرجى إدخال كلمة المرور');
       return;
@@ -33,9 +44,18 @@ export const AdminLoginModal: FC<AdminLoginModalProps> = ({
       const user = await StorageService.login(password);
       if (user) {
         setPassword('');
+        setFailedAttempts(0);
+        setLockedUntil(null);
         onLoginSuccess();
       } else {
-        setError('كلمة المرور غير صحيحة (الافتراضية: admin123)');
+        const newAttempts = failedAttempts + 1;
+        setFailedAttempts(newAttempts);
+        if (newAttempts >= 5) {
+          setLockedUntil(Date.now() + 30_000);
+          setError('تم تجاوز الحد المسموح — اللوحة مقفلة لمدة 30 ثانية');
+        } else {
+          setError(`كلمة المرور غير صحيحة، يرجى المحاولة مجدداً (${5 - newAttempts} محاولات متبقية)`);
+        }
       }
     } catch {
       setError('حدث خطأ أثناء تسجيل الدخول، يرجى المحاولة ثانية');
@@ -89,7 +109,7 @@ export const AdminLoginModal: FC<AdminLoginModalProps> = ({
               <KeyRound className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
             </div>
             <p className="text-[11px] text-gray-400 mt-1.5">
-              كلمة المرور الافتراضية للتجربة: <code className="text-[#88C025] font-bold">admin123</code> (يمكن تغييرها من الداخل)
+              أدخل كلمة مرور لوحة التحكم للمتابعة
             </p>
           </div>
 
@@ -103,10 +123,10 @@ export const AdminLoginModal: FC<AdminLoginModalProps> = ({
           <div className="pt-2">
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-3.5 px-4 bg-[#13331c] hover:bg-[#1a4426] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              disabled={isLoading || isLocked}
+              className="w-full py-3.5 px-4 bg-[#13331c] hover:bg-[#1a4426] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{isLoading ? 'جاري التحقق...' : 'تسجيل الدخول'}</span>
+              <span>{isLoading ? 'جاري التحقق...' : isLocked ? `مقفل (${remainingSecs}ث)` : 'تسجيل الدخول'}</span>
               <ArrowLeft className="w-4 h-4" />
             </button>
           </div>
