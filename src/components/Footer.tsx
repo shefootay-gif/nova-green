@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { Phone, Mail, MessageCircle, Shield, MapPin, Clock } from 'lucide-react';
 import type { CompanySettings } from '../types';
+import { sanitizeUrl } from '../services/storage';
 
 interface FooterProps {
   settings: CompanySettings;
@@ -10,6 +11,7 @@ interface FooterProps {
 export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
   const rawPhone = settings.whatsapp.replace(/[^0-9]/g, '');
   const cleanPhone = rawPhone.startsWith('0') ? '2' + rawPhone : rawPhone;
+  const safeFacebookUrl = sanitizeUrl(settings.facebook, 'https://www.facebook.com');
 
   return (
     <footer id="contact" className="bg-[#13331c] text-white pt-16 pb-12 border-t border-emerald-950">
@@ -54,7 +56,7 @@ export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
 
           {/* Facebook */}
           <a
-            href={settings.facebook}
+            href={safeFacebookUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-3 bg-[#1877F2]/20 hover:bg-[#1877F2]/30 border border-[#1877F2]/30 rounded-2xl p-4 transition-all hover:-translate-y-0.5 group"

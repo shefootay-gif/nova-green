@@ -127,6 +127,29 @@ export async function sha256(message: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Utility to sanitize URLs and protect against javascript: or data: injection
+export function sanitizeUrl(url?: string, fallback: string = '#'): string {
+  if (!url || typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (/^(https?:\/\/|mailto:|tel:|\/)/i.test(trimmed)) {
+    return trimmed;
+  }
+  return fallback;
+}
+
+// Strict schema validation for products to ensure backup integrity
+export function isValidProduct(item: unknown): item is Product {
+  if (!item || typeof item !== 'object') return false;
+  const p = item as Record<string, unknown>;
+  return (
+    typeof p.name === 'string' &&
+    p.name.trim().length > 0 &&
+    typeof p.category === 'string' &&
+    typeof p.activeIngredient === 'string' &&
+    typeof p.isActive === 'boolean'
+  );
+}
+
 export const StorageService = {
   // Fetch products (LocalStorage with auto-seed)
   getProducts(): Product[] {
@@ -158,13 +181,20 @@ export const StorageService = {
     }
   },
 
-  // Save full product array
-  saveProducts(products: Product[]): void {
+  // Save full product array with Quota guard
+  saveProducts(products: Product[]): boolean {
     try {
       localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
       notifySync('products');
-    } catch (e) {
-      console.error('Failed to save to localStorage', e);
+      return true;
+    } catch (e: unknown) {
+      const err = e as { name?: string; code?: number };
+      if (err.name === 'QuotaExceededError' || err.code === 22) {
+        console.error('مساحة التخزين في المتصفح ممتلئة. يرجى ضغط الصور قبل الحفظ.');
+      } else {
+        console.error('Failed to save to localStorage', e);
+      }
+      return false;
     }
   },
 
@@ -310,12 +340,19 @@ export const StorageService = {
     }
   },
 
-  saveSettings(settings: CompanySettings): void {
+  saveSettings(settings: CompanySettings): boolean {
     try {
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
       notifySync('settings');
-    } catch (e) {
-      console.error('Failed to save settings', e);
+      return true;
+    } catch (e: unknown) {
+      const err = e as { name?: string; code?: number };
+      if (err.name === 'QuotaExceededError' || err.code === 22) {
+        console.error('مساحة التخزين في المتصفح ممتلئة عند محاولة حفظ الإعدادات.');
+      } else {
+        console.error('Failed to save settings', e);
+      }
+      return false;
     }
   },
 
@@ -331,17 +368,44 @@ export const StorageService = {
     return JSON.stringify(data, null, 2);
   },
 
-  // Import full site backup (JSON)
+  // Import full site backup (JSON) with deep schema verification
   importBackup(jsonString: string): { success: boolean; message: string } {
     try {
       const data = JSON.parse(jsonString);
-      if (!data.products || !Array.isArray(data.products) || !data.settings) {
-        return { success: false, message: 'ملف النسخة الاحتياطية غير صالح أو تالف' };
+      if (!data || typeof data !== 'object') {
+        return { success: false, message: 'ملف النسخة الاحتياطية غير صالح' };
       }
-      this.saveProducts(data.products);
-      this.saveSettings(data.settings);
+
+      if (!Array.isArray(data.products) || !data.settings) {
+        return { success: false, message: 'بيانات المنتجات أو الإعدادات مفقودة في ملف النسخة الاحتياطية' };
+      }
+
+      // Filter and validate products
+      const validProducts: Product[] = (data.products as unknown[]).filter(isValidProduct);
+      if (validProducts.length === 0 && data.products.length > 0) {
+        return { success: false, message: 'تنسيق المنتجات في النسخة غير متوافق مع النظام' };
+      }
+
+      // Sanitize external URLs in incoming settings
+      const incomingSettings = data.settings as Partial<CompanySettings>;
+      if (incomingSettings.facebook) {
+        incomingSettings.facebook = sanitizeUrl(incomingSettings.facebook, DEFAULT_SETTINGS.facebook);
+      }
+
+      const mergedSettings: CompanySettings = {
+        ...DEFAULT_SETTINGS,
+        ...incomingSettings,
+      };
+
+      const savedProd = this.saveProducts(validProducts);
+      const savedSet = this.saveSettings(mergedSettings);
+
+      if (!savedProd || !savedSet) {
+        return { success: false, message: 'تعذر الحفظ: مساحة المتصفح التخزينية ممتلئة' };
+      }
+
       notifySync('all');
-      return { success: true, message: `تم استعادة النسخة الاحتياطية بنجاح (${data.products.length} منتج)` };
+      return { success: true, message: `تم استعادة النسخة الاحتياطية بنجاح (${validProducts.length} منتج صالح)` };
     } catch {
       return { success: false, message: 'فشل في قراءة ملف JSON' };
     }
