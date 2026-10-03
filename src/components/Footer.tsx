@@ -36,7 +36,7 @@ export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
             </div>
             <div className="text-right">
               <span className="block text-[11px] text-emerald-300 font-medium">واتساب للطلب السريع</span>
-              <span className="text-sm font-bold text-white">{settings.whatsapp}</span>
+              <span className="text-sm font-bold text-white inline-block" dir="ltr">{settings.whatsapp}</span>
             </div>
           </a>
 
@@ -50,7 +50,7 @@ export const Footer: FC<FooterProps> = ({ settings, onOpenAdmin }) => {
             </div>
             <div className="text-right">
               <span className="block text-[11px] text-emerald-300 font-medium">اتصال هاتفي</span>
-              <span className="text-sm font-bold text-white">{settings.phone}</span>
+              <span className="text-sm font-bold text-white inline-block" dir="ltr">{settings.phone}</span>
             </div>
           </a>
 

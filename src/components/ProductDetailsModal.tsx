@@ -158,7 +158,7 @@ export const ProductDetailsModal: FC<ProductDetailsModalProps> = ({
             className="w-full flex-1 inline-flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm shadow-md shadow-[#25D366]/20 transition-all transform hover:-translate-y-0.5"
           >
             <MessageCircle className="w-5 h-5 fill-white text-transparent" />
-            <span>اضغط للطلب عبر واتساب ({settings.whatsapp})</span>
+            <span>اضغط للطلب عبر واتساب <span dir="ltr" className="inline-block font-mono">({settings.whatsapp})</span></span>
           </a>
 
           <a

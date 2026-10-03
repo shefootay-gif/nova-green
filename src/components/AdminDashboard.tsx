@@ -1730,10 +1730,11 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                 </label>
                 <input
                   type="text"
+                  dir="ltr"
                   value={cmsSettings.whatsapp}
                   onChange={(e) => setCmsSettings({ ...cmsSettings, whatsapp: e.target.value })}
                   placeholder="011 31603110"
-                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-4 text-sm font-bold text-emerald-700 focus:outline-none focus:ring-2 focus:ring-[#88C025]"
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-4 text-sm font-bold text-emerald-700 focus:outline-none focus:ring-2 focus:ring-[#88C025] text-left"
                 />
               </div>
 
@@ -1744,10 +1745,11 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                 </label>
                 <input
                   type="text"
+                  dir="ltr"
                   value={cmsSettings.phone}
                   onChange={(e) => setCmsSettings({ ...cmsSettings, phone: e.target.value })}
                   placeholder="011 31603110"
-                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#88C025]"
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#88C025] text-left"
                 />
               </div>
 
