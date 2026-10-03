@@ -2,6 +2,23 @@
 
 @theme {
   --font-sans: 'El Messiri', 'Cairo', system-ui, -apple-system, sans-serif;
+
+  /* Tailwind CSS v4 Semantic Brand & UI Design Tokens */
+  --color-brand-green: #88C025;
+  --color-brand-green-hover: #75a71e;
+  --color-brand-green-light: #f2f9e8;
+  --color-brand-blue: #22A3E2;
+  --color-brand-blue-hover: #1b8ec5;
+  --color-brand-blue-light: #eaf6fc;
+  --color-brand-dark: #13331c;
+  --color-brand-surface: #f9fbf8;
+
+  --color-primary: #88C025;
+  --color-primary-hover: #75a71e;
+  --color-secondary: #22A3E2;
+  --color-accent: #A16207;
+  --color-background: #FCFDFC;
+  --color-surface: #F9FBF8;
 }
 
 @layer base {
