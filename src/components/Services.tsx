@@ -88,7 +88,7 @@ export const Services: FC<ServicesProps> = ({ servicesData }) => {
             return (
               <div
                 key={idx}
-                className="bg-[#fcfdfc] rounded-3xl p-7 border border-gray-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover:border-[#88C025]/50 hover:-translate-y-1.5"
+                className="bg-[#fcfdfc] rounded-3xl p-7 border border-gray-200/80 shadow-xs hover-glow-card flex flex-col justify-between group hover:border-[#88C025]/60 hover:-translate-y-2 relative"
               >
                 <div>
                   {/* Top Bar with Icon and Tag */}

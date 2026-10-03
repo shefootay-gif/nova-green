@@ -100,6 +100,22 @@
   }
 }
 
+/* Micro-interaction & Lighting utilities */
+.hover-glow-card {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.hover-glow-card:hover {
+  box-shadow: 0 20px 35px -10px rgba(136, 192, 37, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  pointer-events: none;
+  z-index: 0;
+}
+
 @keyframes floatBadge1 {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);

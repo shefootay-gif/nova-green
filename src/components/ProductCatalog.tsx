@@ -212,7 +212,7 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
               return (
                 <div
                   key={product.id}
-                  className="bg-white rounded-3xl border border-gray-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group hover:border-[#88C025]/50 hover:-translate-y-1.5"
+                  className="bg-white rounded-3xl border border-gray-200/80 shadow-xs hover-glow-card flex flex-col overflow-hidden group hover:border-[#88C025]/60 hover:-translate-y-2 relative"
                 >
                   {/* Top Image Showcase Area */}
                   <div 
