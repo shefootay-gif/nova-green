@@ -342,12 +342,14 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="grid grid-cols-5 gap-2">
+                      <div className="grid grid-cols-5 gap-2.5">
                         {/* Quick View Button */}
                         <button
+                          type="button"
                           onClick={() => onSelectProduct?.(product)}
-                          className="col-span-1 p-2.5 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer group/info"
+                          className="col-span-1 min-h-[44px] rounded-xl border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer group/info focus:outline-none focus:ring-2 focus:ring-[#88C025]"
                           title="عرض المواصفات الفنية الكاملة"
+                          aria-label={`عرض تفاصيل ومواصفات ${product.name}`}
                         >
                           <Info className="w-4 h-4 group-hover/info:scale-110 transition-transform" />
                         </button>
@@ -357,7 +359,8 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                           href={createWhatsAppLink(product)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="col-span-4 relative overflow-hidden inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1eb755] hover:from-[#20ba59] hover:to-[#179644] text-white font-black text-xs sm:text-sm shadow-md shadow-[#25D366]/25 hover:shadow-xl hover:shadow-[#25D366]/35 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer group/btn"
+                          className="col-span-4 min-h-[44px] relative overflow-hidden inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1eb755] hover:from-[#20ba59] hover:to-[#179644] text-white font-black text-xs sm:text-sm shadow-md shadow-[#25D366]/25 hover:shadow-xl hover:shadow-[#25D366]/35 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer group/btn focus:outline-none focus:ring-2 focus:ring-[#25D366]"
+                          aria-label={`طلب ${product.name} عبر واتساب`}
                         >
                           <div className="absolute inset-0 w-1/2 h-full bg-white/25 skew-x-12 -translate-x-full group-hover/btn:translate-x-[300%] transition-transform duration-700 pointer-events-none"></div>
                           <MessageCircle className="w-4 h-4 fill-white text-transparent shrink-0 group-hover/btn:rotate-12 transition-transform duration-300" />
