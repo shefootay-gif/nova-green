@@ -8,6 +8,7 @@ export interface Product {
   oldPrice?: number;
   unit?: string;
   usage?: string;
+  composition?: string;
   imageUrl?: string;
   badge?: string;
   isActive: boolean;

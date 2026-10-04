@@ -67,6 +67,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
   const [customCategory, setCustomCategory] = useState('');
   const [formActiveIngredient, setFormActiveIngredient] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [formComposition, setFormComposition] = useState('');
   const [formUsage, setFormUsage] = useState('');
   const [formPrice, setFormPrice] = useState<number | ''>('');
   const [formOldPrice, setFormOldPrice] = useState<number | ''>('');
@@ -153,6 +154,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
     setCustomCategory('');
     setFormActiveIngredient('');
     setFormDescription('');
+    setFormComposition('');
     setFormUsage('');
     setFormPrice('');
     setFormOldPrice('');
@@ -177,6 +179,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
     }
     setFormActiveIngredient(prod.activeIngredient);
     setFormDescription(prod.description || '');
+    setFormComposition(prod.composition || '');
     setFormUsage(prod.usage || '');
     setFormPrice(prod.price || '');
     setFormOldPrice(prod.oldPrice || '');
@@ -257,6 +260,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
         category: finalCategory,
         activeIngredient: formActiveIngredient.trim(),
         description: formDescription.trim(),
+        composition: formComposition.trim() || undefined,
         usage: formUsage.trim(),
         price: formPrice ? Number(formPrice) : undefined,
         oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
@@ -272,6 +276,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
         category: finalCategory,
         activeIngredient: formActiveIngredient.trim(),
         description: formDescription.trim(),
+        composition: formComposition.trim() || undefined,
         usage: formUsage.trim(),
         price: formPrice ? Number(formPrice) : undefined,
         oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
@@ -2268,17 +2273,33 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                 />
               </div>
 
-              {/* Description */}
+              {/* Comprehensive Description Field */}
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  الوصف والمجال الزراعي
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center justify-between">
+                  <span>الوصف والخصائص والمجال الزراعي (خانة مفصلة)</span>
+                  <span className="text-[11px] text-gray-400 font-normal">يدعم أسطر متعددة</span>
                 </label>
                 <textarea
-                  rows={2}
+                  rows={4}
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="وصف مختصر لأهمية وتأثير المنتج على النبات..."
-                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2 px-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#88C025]"
+                  placeholder="اكتب وصفاً مفصلاً للمنتج، مميزاته، فوائده للتربة والنبات، وفترة الأمان إن وجدت..."
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#88C025] leading-relaxed"
+                ></textarea>
+              </div>
+
+              {/* Chemical & Physical Composition Field */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center justify-between">
+                  <span className="text-[#22A3E2]">التركيبات ونسب المواد الفعالة والعناصر (خانة التركيبات)</span>
+                  <span className="text-[11px] text-gray-400 font-normal">تظهر بوضوح في صفحة المنتج</span>
+                </label>
+                <textarea
+                  rows={4}
+                  value={formComposition}
+                  onChange={(e) => setFormComposition(e.target.value)}
+                  placeholder={"مثال على التركيب:\n• نيتروجين كلي (N): 10%\n• فوسفور متاح (P2O5): 20%\n• بوتاسيوم قابل للذوبان (K2O): 20%\n• أحماض أمينية حرة: 5%"}
+                  className="w-full bg-[#f9fbf8] border border-gray-200 rounded-xl py-2.5 px-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#22A3E2] leading-relaxed"
                 ></textarea>
               </div>
 

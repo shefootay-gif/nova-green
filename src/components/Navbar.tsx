@@ -4,7 +4,7 @@ import { Menu, X, Shield, PhoneCall } from 'lucide-react';
 interface NavbarProps {
   onOpenAdmin: () => void;
   isAdminLoggedIn: boolean;
-  activeView: 'home' | 'admin';
+  activeView: 'home' | 'admin' | 'product';
   onNavigateHome: () => void;
   whatsappNumber?: string;
 }
@@ -21,7 +21,7 @@ export const Navbar: FC<NavbarProps> = ({
   const cleanPhone = rawPhone.startsWith('0') ? '2' + rawPhone : rawPhone;
 
   const scrollTo = (id: string) => {
-    if (activeView === 'admin') {
+    if (activeView !== 'home') {
       onNavigateHome();
       setTimeout(() => {
         const el = document.getElementById(id);

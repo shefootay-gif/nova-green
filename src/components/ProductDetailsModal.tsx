@@ -6,12 +6,14 @@ interface ProductDetailsModalProps {
   product: Product | null;
   onClose: () => void;
   settings: CompanySettings;
+  onOpenFullPage?: (product: Product) => void;
 }
 
 export const ProductDetailsModal: FC<ProductDetailsModalProps> = ({
   product,
   onClose,
   settings,
+  onOpenFullPage,
 }) => {
   if (!product) return null;
 
@@ -34,16 +36,32 @@ export const ProductDetailsModal: FC<ProductDetailsModalProps> = ({
             <span className="text-xs font-black text-[#88C025] bg-[#f2f9e8] px-2.5 py-1 rounded-full border border-[#88C025]/30">
               {product.category}
             </span>
-            <span className="text-xs text-gray-400 font-semibold">بطاقة المنتج الفنية</span>
+            <span className="text-xs text-gray-400 font-semibold">بطاقة المنتج السريعة</span>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
-            aria-label="إغلاق"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onOpenFullPage && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenFullPage(product);
+                }}
+                className="text-xs font-bold text-[#22A3E2] hover:text-[#1888be] bg-[#eaf6fc] hover:bg-[#d8eefb] px-3 py-1.5 rounded-xl border border-[#22A3E2]/30 transition-colors cursor-pointer flex items-center gap-1.5"
+                title="فتح في صفحة مستقلة كاملة مع تكبير أمازون"
+              >
+                <span>الصفحة المستقلة الكاملة ↗</span>
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+              aria-label="إغلاق"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Scrollable Body */}
@@ -116,16 +134,29 @@ export const ProductDetailsModal: FC<ProductDetailsModalProps> = ({
                 <ShieldCheck className="w-4 h-4 text-[#88C025]" />
                 <span>الخصائص والمواصفات:</span>
               </h3>
-              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-medium whitespace-pre-line">
                 {product.description || 'مركب فعال ذو جودة عالية تم اختياره بعناية لتقديم أعلى كفاءة وإنتاجية للمحصول.'}
               </p>
             </div>
 
+            {/* Chemical & Physical Composition if present */}
+            {product.composition && (
+              <div className="bg-[#eaf6fc]/40 p-4 rounded-xl border border-[#22A3E2]/30">
+                <h3 className="text-xs font-bold text-[#1b8dc4] mb-1 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#22A3E2]" />
+                  <span>التركيب والمكونات الفعالة:</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-800 leading-relaxed font-semibold whitespace-pre-line">
+                  {product.composition}
+                </p>
+              </div>
+            )}
+
             {/* Usage or Target if present */}
             {product.usage && (
-              <div className="bg-[#eaf6fc]/40 p-4 rounded-xl border border-[#22A3E2]/20">
-                <h3 className="text-xs font-bold text-[#1b8dc4] mb-1 flex items-center gap-1.5">
-                  <HelpCircle className="w-4 h-4 text-[#22A3E2]" />
+              <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-200/80">
+                <h3 className="text-xs font-bold text-amber-700 mb-1 flex items-center gap-1.5">
+                  <HelpCircle className="w-4 h-4 text-amber-600" />
                   <span>طريقة ومجال الاستخدام:</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">

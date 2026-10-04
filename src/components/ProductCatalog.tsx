@@ -6,6 +6,7 @@ interface ProductCatalogProps {
   products: Product[];
   whatsappNumber?: string;
   onSelectProduct?: (product: Product) => void;
+  onOpenProductPage?: (product: Product) => void;
   catalogNotice?: CatalogNoticeContent;
   showPrices?: boolean;
   showDiscounts?: boolean;
@@ -15,6 +16,7 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
   products,
   whatsappNumber = '011 31603110',
   onSelectProduct,
+  onOpenProductPage,
   catalogNotice,
   showPrices = true,
   showDiscounts = true,
@@ -216,7 +218,13 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                 >
                   {/* Top Image Showcase Area */}
                   <div 
-                    onClick={() => onSelectProduct?.(product)}
+                    onClick={() => {
+                      if (onOpenProductPage) {
+                        onOpenProductPage(product);
+                      } else {
+                        onSelectProduct?.(product);
+                      }
+                    }}
                     className="relative h-52 bg-gradient-to-br from-[#f8fbf6] via-[#eef6ec] to-[#e6f3fa] p-5 flex items-center justify-center cursor-pointer overflow-hidden"
                   >
                     {/* Background glow circle */}
@@ -285,7 +293,13 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                     <div className="space-y-2">
                       {/* Product Name */}
                       <h3 
-                        onClick={() => onSelectProduct?.(product)}
+                        onClick={() => {
+                          if (onOpenProductPage) {
+                            onOpenProductPage(product);
+                          } else {
+                            onSelectProduct?.(product);
+                          }
+                        }}
                         className="text-xl font-black text-gray-900 group-hover:text-[#88C025] transition-colors cursor-pointer"
                       >
                         {product.name}
