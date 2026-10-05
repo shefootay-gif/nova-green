@@ -34,8 +34,8 @@ export const DEFAULT_SETTINGS: CompanySettings = {
   email: 'novagreen110@gmail.com',
   address: 'جمهورية مصر العربية - خدمة المزارعين في كافة المحافظات',
   workingHours: 'يومياً من 9:00 صباحاً حتى 9:00 مساءً (دعم فني واستشارات متواصل)',
-  showPrices: true,
-  showDiscounts: true,
+  showPrices: false,
+  showDiscounts: false,
   hero: {
     topBadge: 'حلول زراعية متطورة • جودة موثوقة • إنتاجية أعلى',
     titleLine1: 'نزرع النجاح',
@@ -314,8 +314,8 @@ export const StorageService = {
       return {
         ...DEFAULT_SETTINGS,
         ...parsed,
-        showPrices: parsed.showPrices !== undefined ? Boolean(parsed.showPrices) : true,
-        showDiscounts: parsed.showDiscounts !== undefined ? Boolean(parsed.showDiscounts) : true,
+        showPrices: parsed.showPrices !== undefined ? Boolean(parsed.showPrices) : false,
+        showDiscounts: parsed.showDiscounts !== undefined ? Boolean(parsed.showDiscounts) : false,
         hero: { ...DEFAULT_SETTINGS.hero, ...(parsed.hero || {}) },
         services: {
           ...DEFAULT_SETTINGS.services,
