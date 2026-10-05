@@ -12,7 +12,6 @@ import {
   LogOut,
   RotateCcw,
   KeyRound,
-  Cloud,
   Layers,
   Sparkles,
   Eye,
@@ -712,37 +711,23 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
               </div>
             </div>
 
-            {/* Cloudflare Pages & Quick Actions Banner */}
-            <div className="bg-gradient-to-r from-[#13331c] to-[#1e4a2a] text-white p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[#88C025]">
-                  <Cloud className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white">متوافق 100% مع Cloudflare Pages المجانية</h4>
-                  <p className="text-xs text-emerald-200/80">
-                    ضغط فوري لصور المنتجات لمنع بطء التصفح وباندويث غير محدود على سيرفرات Cloudflare Edge.
-                  </p>
-                </div>
-              </div>
+            {/* Quick Actions Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+              <button
+                onClick={handleResetDefaults}
+                className="inline-flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all cursor-pointer border border-gray-200"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-gray-500" />
+                <span>استعادة الـ 17 منتج الأصلية</span>
+              </button>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleResetDefaults}
-                  className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer border border-white/10"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#88C025]" />
-                  <span>استعادة الـ 17 منتج الأصلية</span>
-                </button>
-
-                <button
-                  onClick={handleOpenAdd}
-                  className="inline-flex items-center gap-1.5 bg-[#88C025] hover:bg-[#77ab1f] text-white text-xs font-black px-4 py-2 rounded-xl transition-all cursor-pointer shadow-md"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>إضافة منتج جديد</span>
-                </button>
-              </div>
+              <button
+                onClick={handleOpenAdd}
+                className="inline-flex items-center justify-center gap-1.5 bg-[#88C025] hover:bg-[#77ab1f] text-white text-xs font-black px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md"
+              >
+                <Plus className="w-4 h-4" />
+                <span>إضافة منتج جديد</span>
+              </button>
             </div>
 
             {/* Table & Controls Section */}
