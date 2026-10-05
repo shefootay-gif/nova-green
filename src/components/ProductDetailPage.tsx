@@ -84,6 +84,20 @@ export const ProductDetailPage: FC<ProductDetailPageProps> = ({
           </button>
 
           <div className="flex items-center gap-2">
+            {/* Direct WhatsApp Share Button */}
+            <a
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                `*شركة نوفا جرين (Nova Green)* 🌱\n\n📌 *مركب:* ${product.name}\n🔬 *المادة الفعالة:* ${product.activeIngredient}\n🏷️ *التصنيف:* ${product.category}\n\n📖 للاطلاع على المواصفات الفنية الكاملة والصور ثلاثية الأبعاد:\n${window.location.origin}/#product-${product.id}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#128C7E] font-bold text-xs shadow-2xs transition-colors cursor-pointer"
+              title="مشاركة تفاصيل ومواصفات المنتج عبر واتساب"
+            >
+              <MessageCircle className="w-4 h-4 text-[#25D366]" />
+              <span>مشاركة عبر واتساب</span>
+            </a>
+
             <button
               onClick={handleShare}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-600 font-bold text-xs shadow-2xs transition-colors cursor-pointer"
@@ -97,7 +111,7 @@ export const ProductDetailPage: FC<ProductDetailPageProps> = ({
               ) : (
                 <>
                   <Share2 className="w-4 h-4 text-gray-500" />
-                  <span>مشاركة المنتج</span>
+                  <span>نسخ الرابط</span>
                 </>
               )}
             </button>
