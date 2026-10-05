@@ -344,6 +344,16 @@ export const StorageService = {
     try {
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
       notifySync('settings');
+
+      // Asynchronously sync globally to Cloudflare KV Edge
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      }).catch((err) => {
+        console.warn('Cloudflare KV sync note:', err);
+      });
+
       return true;
     } catch (e: unknown) {
       const err = e as { name?: string; code?: number };
@@ -353,6 +363,24 @@ export const StorageService = {
         console.error('Failed to save settings', e);
       }
       return false;
+    }
+  },
+
+  // Fetch central global settings from Cloudflare KV Edge
+  async fetchCloudSettings(): Promise<CompanySettings | null> {
+    try {
+      const res = await fetch('/api/settings', { cache: 'no-store' });
+      if (res.ok) {
+        const cloudData = await res.json();
+        if (cloudData && typeof cloudData === 'object' && !cloudData.found) {
+          // Merge with local storage and update
+          localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(cloudData));
+          return cloudData as CompanySettings;
+        }
+      }
+      return null;
+    } catch {
+      return null;
     }
   },
 

@@ -31,6 +31,13 @@ export function App() {
     const initialSettings = StorageService.getSettings();
     setSettings(initialSettings);
 
+    // Fetch central global cloud settings from Cloudflare KV (Real-time global sync)
+    StorageService.fetchCloudSettings().then((cloudSettings) => {
+      if (cloudSettings) {
+        setSettings(cloudSettings);
+      }
+    });
+
     // Check auth
     const user = StorageService.getCurrentUser();
     if (user) {
