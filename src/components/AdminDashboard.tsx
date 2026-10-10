@@ -975,6 +975,15 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
               </button>
 
               <button
+                onClick={handleOpenAddCategory}
+                className="inline-flex items-center justify-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-2xs"
+                title="إضافة تصنيف زراعي جديد وتحديده في الموقع"
+              >
+                <Tag className="w-4 h-4 text-emerald-600" />
+                <span>+ إضافة تصنيف جديد</span>
+              </button>
+
+              <button
                 onClick={handleOpenAdd}
                 className="inline-flex items-center justify-center gap-1.5 bg-[#88C025] hover:bg-[#77ab1f] text-white text-xs font-black px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md"
               >
@@ -2723,7 +2732,19 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
               {/* Category Picker */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">التصنيف *</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-gray-700">التصنيف *</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsProductModalOpen(false);
+                        handleOpenAddCategory();
+                      }}
+                      className="text-[#88C025] hover:underline text-[11px] font-black cursor-pointer"
+                    >
+                      + نافذة إضافة تصنيف جديد
+                    </button>
+                  </div>
                   <select
                     value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value)}
