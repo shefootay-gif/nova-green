@@ -1,9 +1,26 @@
-import type { Product, SafeUser, CompanySettings } from '../types';
+import type { Product, SafeUser, CompanySettings, ProductCategory } from '../types';
 import { INITIAL_PRODUCTS } from '../data/initialProducts';
 
 export const PRODUCTS_STORAGE_KEY = 'nova_green_products_v3';
 export const SETTINGS_STORAGE_KEY = 'nova_green_settings_v2';
+export const CATEGORIES_STORAGE_KEY = 'nova_green_categories_v1';
 export const AUTH_TOKEN_KEY = 'nova_green_admin_session';
+
+export const DEFAULT_CATEGORIES: ProductCategory[] = [
+  { id: 'cat-1', name: 'عناصر صغرى', description: 'مركبات مخلبية سريعة الامتصاص لعلاج أعراض نقص العناصر', color: 'emerald', icon: '🌿', isActive: true, order: 1 },
+  { id: 'cat-2', name: 'طحالب وأحماض', description: 'مستخلصات طحالب بحرية طبيعية ومحفزات نمو ومقاومة إجهاد', color: 'teal', icon: '🌱', isActive: true, order: 2 },
+  { id: 'cat-3', name: 'هيوميك', description: 'هيوميك أسيد عالي النقاوة لتحسين خواص التربة وتنشيط الجذور', color: 'amber', icon: '🌾', isActive: true, order: 3 },
+  { id: 'cat-4', name: 'فولفيك', description: 'أحماض عضوية دقيقة سريعة النفاذية لتنشيط العمليات الحيوية', color: 'lime', icon: '✨', isActive: true, order: 4 },
+  { id: 'cat-5', name: 'مبيد حشري', description: 'مركبات متخصصة للقضاء على الآفات الحشرية الضارة', color: 'rose', icon: '🛡️', isActive: true, order: 5 },
+  { id: 'cat-6', name: 'مكافحة أعفان', description: 'وقاية وعلاج أعفان الجذور والتاج والذبول', color: 'purple', icon: '🧪', isActive: true, order: 6 },
+  { id: 'cat-7', name: 'مكافحة نيماتودا', description: 'حماية متخصصة للجذور والشعيرات الجذرية من النيماتودا', color: 'blue', icon: '🔬', isActive: true, order: 7 },
+  { id: 'cat-8', name: 'معالجة ملوحة', description: 'طرد أملاح الصوديوم وتيسير امتصاص المياه والعناصر', color: 'cyan', icon: '💧', isActive: true, order: 8 },
+  { id: 'cat-9', name: 'كالسيوم', description: 'تثبيت العقد وزيادة صلابة وجودة الثمار التصديرية', color: 'emerald', icon: '🍎', isActive: true, order: 9 },
+  { id: 'cat-10', name: 'أحماض أمينية', description: 'رفع مناعة النبات وتحفيز تخليق البروتين ومقاومة الصقيع', color: 'teal', icon: '⚡', isActive: true, order: 10 },
+  { id: 'cat-11', name: 'مبيد أكاروسي / حشري', description: 'تأثير مزدوج لمكافحة الأكاروسات والآفات الحشرية', color: 'rose', icon: '🎯', isActive: true, order: 11 },
+  { id: 'cat-12', name: 'مبيد أكاروسي', description: 'مكافحة متخصصة للعناكب الحمراء والديدان الدقيقة', color: 'amber', icon: '🕷️', isActive: true, order: 12 },
+  { id: 'cat-13', name: 'مبيد فطري', description: 'علاج فعال للبياض الدقيقي والزغبي واللفحات والتبقعات', color: 'purple', icon: '🧫', isActive: true, order: 13 },
+];
 
 // Real-time synchronization BroadcastChannel for instant cross-tab sync
 let syncChannel: BroadcastChannel | null = null;
@@ -36,6 +53,7 @@ export const DEFAULT_SETTINGS: CompanySettings = {
   workingHours: 'يومياً من 9:00 صباحاً حتى 9:00 مساءً (دعم فني واستشارات متواصل)',
   showPrices: false,
   showDiscounts: false,
+  categories: DEFAULT_CATEGORIES,
   hero: {
     topBadge: 'حلول زراعية متطورة • جودة موثوقة • إنتاجية أعلى',
     titleLine1: 'نزرع النجاح',
@@ -334,10 +352,84 @@ export const StorageService = {
         },
         about: { ...DEFAULT_SETTINGS.about, ...(parsed.about || {}) },
         catalogNotice: { ...DEFAULT_SETTINGS.catalogNotice, ...(parsed.catalogNotice || {}) },
+        categories: (parsed.categories && Array.isArray(parsed.categories) && parsed.categories.length > 0)
+          ? parsed.categories
+          : DEFAULT_CATEGORIES,
       };
     } catch {
       return DEFAULT_SETTINGS;
     }
+  },
+
+  // Category Management Methods
+  getCategories(): ProductCategory[] {
+    const settings = this.getSettings();
+    if (settings.categories && Array.isArray(settings.categories) && settings.categories.length > 0) {
+      return [...settings.categories].sort((a, b) => (a.order || 0) - (b.order || 0));
+    }
+    return DEFAULT_CATEGORIES;
+  },
+
+  saveCategories(categories: ProductCategory[]): boolean {
+    const settings = this.getSettings();
+    settings.categories = categories;
+    return this.saveSettings(settings);
+  },
+
+  updateCategory(oldName: string, updatedCategory: ProductCategory): { success: boolean; affectedProducts: number } {
+    const categories = this.getCategories();
+    const catIdx = categories.findIndex(c => c.id === updatedCategory.id || c.name === oldName);
+    if (catIdx !== -1) {
+      categories[catIdx] = updatedCategory;
+    } else {
+      categories.push(updatedCategory);
+    }
+    this.saveCategories(categories);
+
+    let affected = 0;
+    if (oldName && oldName.trim() !== updatedCategory.name.trim()) {
+      const products = this.getProducts();
+      const updatedProducts = products.map(p => {
+        if (p.category === oldName) {
+          affected++;
+          return { ...p, category: updatedCategory.name };
+        }
+        return p;
+      });
+      if (affected > 0) {
+        this.saveProducts(updatedProducts);
+      }
+    }
+
+    return { success: true, affectedProducts: affected };
+  },
+
+  deleteCategory(categoryId: string, categoryName: string, reassignTo?: string): { success: boolean; affectedProducts: number } {
+    const categories = this.getCategories().filter(c => c.id !== categoryId && c.name !== categoryName);
+    this.saveCategories(categories);
+
+    let affected = 0;
+    const products = this.getProducts();
+    const targetCategory = reassignTo && reassignTo.trim() ? reassignTo.trim() : (categories[0]?.name || 'عام');
+    const updatedProducts = products.map(p => {
+      if (p.category === categoryName) {
+        affected++;
+        return { ...p, category: targetCategory };
+      }
+      return p;
+    });
+    if (affected > 0) {
+      this.saveProducts(updatedProducts);
+    }
+
+    return { success: true, affectedProducts: affected };
+  },
+
+  resetCategoriesToDefault(): ProductCategory[] {
+    const settings = this.getSettings();
+    settings.categories = DEFAULT_CATEGORIES;
+    this.saveSettings(settings);
+    return DEFAULT_CATEGORIES;
   },
 
   saveSettings(settings: CompanySettings): boolean {

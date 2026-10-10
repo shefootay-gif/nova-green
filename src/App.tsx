@@ -172,6 +172,7 @@ export function App() {
             <Services servicesData={settings.services} />
             <ProductCatalog
               products={products}
+              categories={settings.categories}
               whatsappNumber={settings.whatsapp}
               onSelectProduct={(p) => {
                 setSelectedProductModal(p);

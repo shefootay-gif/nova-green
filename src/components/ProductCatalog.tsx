@@ -1,9 +1,10 @@
 import { useState, useMemo, type FC } from 'react';
 import { Search, Filter, MessageCircle, Sparkles, Info, Tag, CheckCircle2 } from 'lucide-react';
-import type { Product, CatalogNoticeContent } from '../types';
+import type { Product, CatalogNoticeContent, ProductCategory } from '../types';
 
 interface ProductCatalogProps {
   products: Product[];
+  categories?: ProductCategory[];
   whatsappNumber?: string;
   onSelectProduct?: (product: Product) => void;
   onOpenProductPage?: (product: Product) => void;
@@ -14,6 +15,7 @@ interface ProductCatalogProps {
 
 export const ProductCatalog: FC<ProductCatalogProps> = ({
   products,
+  categories: managedCategories,
   whatsappNumber = '011 31603110',
   onSelectProduct,
   onOpenProductPage,
@@ -24,14 +26,30 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Extract unique categories
-  const categories = useMemo(() => {
+  // Resolved categories list (uses managed categories if provided, else falls back to product categories)
+  const categoryItems = useMemo<ProductCategory[]>(() => {
+    if (managedCategories && Array.isArray(managedCategories) && managedCategories.length > 0) {
+      // Filter active categories and sort by order
+      return [...managedCategories]
+        .filter((c) => c.isActive !== false)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+    }
+    // Fallback: extract unique categories from products
     const set = new Set<string>();
     products.forEach((p) => {
       if (p.category) set.add(p.category);
     });
-    return Array.from(set);
-  }, [products]);
+    return Array.from(set).map((name, index) => ({
+      id: `cat-${index + 1}`,
+      name,
+      isActive: true,
+      order: index + 1,
+    }));
+  }, [managedCategories, products]);
+
+  const getCategoryProductCount = (categoryName: string) => {
+    return products.filter((p) => p.isActive && p.category === categoryName).length;
+  };
 
   // Filter products by search and category
   const filteredProducts = useMemo(() => {
@@ -53,32 +71,56 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
   }, [products, searchTerm, selectedCategory]);
 
   const getCategoryTheme = (cat: string) => {
-    if (cat.includes('حشري') || cat.includes('أكاروسي')) {
+    const matched = categoryItems.find((c) => c.name === cat);
+    const color = matched?.color;
+
+    if (color === 'amber' || (!color && (cat.includes('حشري') || cat.includes('أكاروسي')))) {
       return {
         badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
         glow: 'from-amber-500/10 to-transparent',
         accentColor: '#d97706',
       };
     }
-    if (cat.includes('فطري') || cat.includes('أعفان')) {
+    if (color === 'purple' || (!color && (cat.includes('فطري') || cat.includes('أعفان')))) {
       return {
         badgeBg: 'bg-purple-50 text-purple-800 border-purple-200',
         glow: 'from-purple-500/10 to-transparent',
         accentColor: '#9333ea',
       };
     }
-    if (cat.includes('طحالب') || cat.includes('أحماض') || cat.includes('هيوميك') || cat.includes('فولفيك')) {
+    if (color === 'rose') {
       return {
-        badgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-        glow: 'from-emerald-500/10 to-transparent',
-        accentColor: '#059669',
+        badgeBg: 'bg-rose-50 text-rose-800 border-rose-200',
+        glow: 'from-rose-500/10 to-transparent',
+        accentColor: '#e11d48',
       };
     }
-    if (cat.includes('كالسيوم') || cat.includes('ملوحة') || cat.includes('نيماتودا')) {
+    if (color === 'blue' || (!color && (cat.includes('كالسيوم') || cat.includes('نيماتودا')))) {
       return {
         badgeBg: 'bg-blue-50 text-blue-800 border-blue-200',
         glow: 'from-blue-500/10 to-transparent',
         accentColor: '#2563eb',
+      };
+    }
+    if (color === 'cyan' || (!color && cat.includes('ملوحة'))) {
+      return {
+        badgeBg: 'bg-cyan-50 text-cyan-800 border-cyan-200',
+        glow: 'from-cyan-500/10 to-transparent',
+        accentColor: '#0891b2',
+      };
+    }
+    if (color === 'teal' || (!color && (cat.includes('طحالب') || cat.includes('أحماض')))) {
+      return {
+        badgeBg: 'bg-teal-50 text-teal-800 border-teal-200',
+        glow: 'from-teal-500/10 to-transparent',
+        accentColor: '#0d9488',
+      };
+    }
+    if (color === 'lime') {
+      return {
+        badgeBg: 'bg-lime-50 text-lime-800 border-lime-200',
+        glow: 'from-lime-500/10 to-transparent',
+        accentColor: '#65a30d',
       };
     }
     return {
@@ -148,10 +190,10 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full appearance-none bg-[#f9fbf8] border border-gray-200 rounded-2xl py-3.5 pr-11 pl-4 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#88C025] cursor-pointer shadow-2xs"
               >
-                <option value="all">كل التصنيفات ({products.length} منتج)</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                <option value="all">كل التصنيفات ({products.filter((p) => p.isActive).length} منتج)</option>
+                {categoryItems.map((cat) => (
+                  <option key={cat.id || cat.name} value={cat.name}>
+                    {cat.icon ? `${cat.icon} ` : ''}{cat.name} ({getCategoryProductCount(cat.name)} منتج)
                   </option>
                 ))}
               </select>
@@ -163,27 +205,46 @@ export const ProductCatalog: FC<ProductCatalogProps> = ({
           <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-2 scrollbar-none">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                 selectedCategory === 'all'
                   ? 'bg-[#13331c] text-white shadow-sm'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
               }`}
             >
-              الكل ({products.length})
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                  selectedCategory === cat
-                    ? 'bg-[#88C025] text-white shadow-sm'
-                    : 'bg-[#f2f9e8] text-gray-700 hover:bg-[#e4f5d2]'
+              <span>الكل</span>
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-full font-black ${
+                  selectedCategory === 'all' ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
                 }`}
               >
-                {cat}
-              </button>
-            ))}
+                {products.filter((p) => p.isActive).length}
+              </span>
+            </button>
+            {categoryItems.map((cat) => {
+              const count = getCategoryProductCount(cat.name);
+              const isSelected = selectedCategory === cat.name;
+              return (
+                <button
+                  key={cat.id || cat.name}
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-[#88C025] text-white shadow-sm'
+                      : 'bg-[#f2f9e8] text-gray-700 hover:bg-[#e4f5d2]'
+                  }`}
+                >
+                  {cat.icon && <span className="text-sm">{cat.icon}</span>}
+                  <span>{cat.name}</span>
+                  <span
+                    className={`text-[11px] px-1.5 py-0.5 rounded-full font-black ${
+                      isSelected ? 'bg-white/25 text-white' : 'bg-[#88C025]/20 text-[#3b630b]'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

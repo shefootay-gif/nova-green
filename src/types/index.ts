@@ -15,6 +15,16 @@ export interface Product {
   createdAt: string;
 }
 
+export interface ProductCategory {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string; // emerald, amber, purple, blue, cyan, rose, lime
+  icon?: string; // emoji or icon tag
+  isActive: boolean;
+  order: number;
+}
+
 // User Entity without password (following User Entity Security Rule)
 export interface SafeUser {
   id: string;
@@ -97,6 +107,7 @@ export interface CompanySettings {
   workingHours: string;
   showPrices: boolean;
   showDiscounts: boolean;
+  categories?: ProductCategory[];
   hero: HeroContent;
   services: ServicesContent;
   trustRibbon: TrustRibbonContent;
